@@ -41,25 +41,40 @@ export default function Navbar() {
     }}>
       <h2 style={{ margin: 0, color: "#2563eb", fontSize: "20px" }}>💊 MedDirectory</h2>
 
-      {/* Notification Icon to Redirect Page */}
+      {/* Notification Icon with Original SVG Bell */}
       <div style={{ position: "relative" }}>
         <button
           onClick={() => router.push("/requested")}
           style={{
             background: "#f1f5f9",
             border: "none",
-            padding: "10px 14px",
+            padding: "10px",
             borderRadius: "50%",
             cursor: "pointer",
-            fontSize: "18px",
             position: "relative",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center"
+            justifyContent: "center",
+            transition: "background 0.2s ease"
           }}
           title="Requested Medicines"
         >
-          🔔
+          {/* Original SVG Bell Icon */}
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="20" 
+            height="20" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="#475569" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          >
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+          </svg>
+
           {missingList.length > 0 && (
             <span style={{
               position: "absolute",
