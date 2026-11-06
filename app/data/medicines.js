@@ -1,0 +1,163 @@
+export const CompanyList = [
+  "Square Pharmaceuticals Ltd.",
+  "Incepta Pharmaceuticals Ltd.",
+  "Beximco Pharmaceuticals Ltd.",
+  "Renata PLC",
+  "The ACME Laboratories Ltd.",
+  "ACI Pharmaceuticals",
+  "Aristopharma Ltd.",
+  "Opsonin Pharma Ltd.",
+  "Healthcare Pharmaceuticals Ltd.",
+  "Eskayef Pharmaceuticals Ltd. (SK+F)",
+  "Popular Pharmaceuticals Ltd.",
+  "Drug International Ltd.",
+  "Ibn Sina Pharmaceutical Industry Ltd.",
+  "Beacon Pharmaceuticals PLC",
+  "Orion Pharma Ltd.",
+  "Radiant Pharmaceuticals Ltd.",
+  "General Pharmaceuticals Ltd.",
+  "Unimed Unihealth Pharmaceuticals Ltd.",
+  "Ziska Pharmaceuticals Ltd.",
+  "NIPRO JMI Pharma Ltd.",
+  "Navana Pharmaceuticals Ltd.",
+  "Nuvista Pharma Ltd.",
+  "Healthcare Formulations Ltd.",
+  "Synovia Pharma PLC",
+  "Apex Pharma Ltd.",
+  "Albion Laboratories Ltd.",
+  "Alco Pharma Ltd.",
+  "Ambee Pharmaceuticals Ltd.",
+  "Amico Laboratories Ltd.",
+  "Asiatic Laboratories Ltd.",
+  "Ad-din Pharmaceuticals Ltd.",
+  "Aexim Pharmaceuticals Ltd.",
+  "Al-Madina Pharmaceuticals Ltd.",
+  "Army Pharma Ltd.",
+  "Astra Biopharmaceuticals Ltd.",
+  "Biopharma Ltd.",
+  "Benham Pharmaceuticals Ltd.",
+  "Bristol Pharma Ltd.",
+  "Delta Pharma Ltd.",
+  "Edruc Ltd.",
+  "Everest Pharmaceuticals Ltd.",
+  "Jayson Pharmaceuticals Ltd.",
+  "Kumudini Pharma Ltd.",
+  "Marksman Pharmaceutical Ltd.",
+  "Millat Pharmaceuticals Ltd.",
+  "Nipa Pharmaceuticals Ltd.",
+  "Novus Pharmaceuticals Ltd.",
+  "Pacific Pharmaceuticals Ltd.",
+  "Silva Pharmaceuticals Ltd.",
+  "Techno Drugs Ltd."
+];
+
+export const medicinesData = [
+  {
+    id: "napa-500",
+    name: "Napa 500mg",
+    company: "Beximco Pharmaceuticals Ltd.",
+    image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&auto=format&fit=crop&q=80",
+    uses: "জ্বর, মাথা ব্যথা এবং সাধারণ শরীরের ব্যথায় ব্যবহার করা হয়।",
+    dosage: "দিনে ২ থেকে ৩ বার (খাবারের পর)।",
+    sideEffects: "সাধারণত কোনো পার্শ্বপ্রতিক্রিয়া নেই, তবে অতিরিক্ত সেবনে লিভারের ক্ষতি হতে পারে।"
+  },
+  {
+    id: "seclo-20",
+    name: "Seclo 20mg",
+    company: "Square Pharmaceuticals Ltd.",
+    image: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=600&auto=format&fit=crop&q=80",
+    uses: "গ্যাস্ট্রিক, অ্যাসিডিটি এবং আলসারের চিকিৎসায় ব্যবহৃত হয়।",
+    dosage: "দিনে ২ বার (খাবারের ২০-৩০ মিনিট আগে)।",
+    sideEffects: "মাথা ব্যথা, ডায়রিয়া বা পেটে ব্যথা হতে পারে।"
+  },
+  {
+    id: "ace-500",
+    name: "Ace 500mg",
+    company: "Square Pharmaceuticals Ltd.",
+    image: "https://images.unsplash.com/photo-1550572017-edd951b55104?w=600&auto=format&fit=crop&q=80",
+    uses: "ব্যথা ও জ্বর কমানোর জন্য ব্যবহৃত হয়।",
+    dosage: "দিনে ২ থেকে ৩ বার (খাবারের পর)।",
+    sideEffects: "বমি বমি ভাব, হালকা অ্যালার্জিক রিঅ্যাকশন হতে পারে।"
+  },
+  {
+    id: "cimax-500",
+    name: "Cimax 500mg",
+    company: "Incepta Pharmaceuticals Ltd.",
+    image: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=600&auto=format&fit=crop&q=80",
+    uses: "ব্যাকটেরিয়া জনিত ইনফেকশন বা অ্যান্টিবায়োটিক হিসেবে ব্যবহৃত হয়।",
+    dosage: "দিনে ১ বার (খাবারের পর, ডাক্তারের পরামর্শ অনুযায়ী)।",
+    sideEffects: "পেট খারাপ, পাতলা পায়খানা হতে পারে।"
+  },
+  {
+    id: "maxpro-20",
+    name: "Maxpro 20mg",
+    company: "Renata PLC",
+    image: "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=600&auto=format&fit=crop&q=80",
+    uses: "সিভিয়ার অ্যাসিডিটি ও হার্ট বার্ন-এর জন্য ব্যবহৃত হয়।",
+    dosage: "দিনে ১ বার সকালে খালি পেটে।",
+    sideEffects: "মুখ শুকিয়ে যাওয়া, ঘুমে ঝিমঝিম ভাব।"
+  },
+  {
+    id: "almotil",
+    name: "Almotil",
+    company: "The ACME Laboratories Ltd.",
+    image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&auto=format&fit=crop&q=80",
+    uses: "বমি ও পেট ফাঁপা বন্ধ করতে ব্যবহার করা হয়।",
+    dosage: "খাওয়ার ১৫ মিনিট আগে ১টি করে ট্যাবলেট।",
+    sideEffects: "হালকা দুর্বলতা এবং মুখ শুকানো।"
+  },
+  {
+    id: "ebat-10",
+    name: "Ebat 10mg",
+    company: "ACI Pharmaceuticals",
+    image: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=600&auto=format&fit=crop&q=80",
+    uses: "অ্যালার্জি, সর্দি ও চুলকানি কমাতে কাজ করে।",
+    dosage: "দিনে ১টি ট্যাবলেট রাতে।",
+    sideEffects: "হালকা ঘুম লাগতে পারে।"
+  },
+  {
+    id: "fenadin-120",
+    name: "Fenadin 120mg",
+    company: "Aristopharma Ltd.",
+    image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&auto=format&fit=crop&q=80",
+    uses: "অ্যালার্জিক রাইনাইটিস ও চুলকানির জন্য সেরা মেডিসিন।",
+    dosage: "দিনে ১ বার।",
+    sideEffects: "ক্লান্তি ও মাথা ঘোরা।"
+  },
+  {
+    id: "finix-20",
+    name: "Finix 20mg",
+    company: "Opsonin Pharma Ltd.",
+    image: "https://images.unsplash.com/photo-1550572017-edd951b55104?w=600&auto=format&fit=crop&q=80",
+    uses: "গ্যাস্ট্রিক আলসার ও অ্যাসিড রিফ্লাক্স-এর চিকিৎসা।",
+    dosage: "খাওয়ার আগে দিনে ২ বার।",
+    sideEffects: "হালকা পেট ব্যথা।"
+  },
+  {
+    id: "sergel-20",
+    name: "Sergel 20mg",
+    company: "Healthcare Pharmaceuticals Ltd.",
+    image: "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=600&auto=format&fit=crop&q=80",
+    uses: "অ্যাসিডিটি ও পেট জ্বালা করা বন্ধ করে।",
+    dosage: "দিনে ২ বার খাবারের আগে।",
+    sideEffects: "পেট ফাঁপা ও দুর্বলতা।"
+  },
+  {
+    id: "skcef-200",
+    name: "SK-Cef 200mg",
+    company: "Eskayef Pharmaceuticals Ltd. (SK+F)",
+    image: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=600&auto=format&fit=crop&q=80",
+    uses: "রেসপিরেটরি ট্র্যাক্ট ইনফেকশন এবং গনোরিয়া-র চিকিৎসা।",
+    dosage: "দিনে ২ বার ডাক্তারের পরামর্শ অনুযায়ী।",
+    sideEffects: "বমি বমি ভাব এবং মাথা ব্যথা।"
+  },
+  {
+    id: "progut-15",
+    name: "Progut 15mg",
+    company: "Popular Pharmaceuticals Ltd.",
+    image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&auto=format&fit=crop&q=80",
+    uses: "গ্যাস্ট্রিক এবং পাকস্থলীর ঘা নিরাময়ে।",
+    dosage: "দিনে ১ বার।",
+    sideEffects: "হালকা পেট ব্যথা।"
+  }
+];
