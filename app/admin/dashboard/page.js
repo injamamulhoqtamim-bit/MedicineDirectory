@@ -337,27 +337,31 @@ export default function AdminDashboard() {
       style={{
         display: "flex",
         flexDirection: isMobile ? "column" : "row",
-        minHeight: "100vh",
+        alignItems: "flex-start",
+        minHeight: "100dvh",
         background: "linear-gradient(180deg, #f8fafc 0%, #eef2f6 100%)",
         width: "100%",
-        maxWidth: "100%",
-        overflowX: "hidden",
+        maxWidth: "100vw",
+        overflowX: "clip",
         boxSizing: "border-box",
       }}
     >
-      {/* Premium Toast Pop-up Notification */}
+      {/* Top Toast Pop-up Notification (Save & Delete Confirm) */}
       {toast && (
         <div
+          role="status"
+          aria-live="polite"
           style={{
             position: "fixed",
-            bottom: isMobile ? "14px" : "24px",
-            right: isMobile ? "14px" : "24px",
-            left: isMobile ? "14px" : "auto",
-            zIndex: 2000,
+            top: isMobile ? "12px" : "20px",
+            left: isMobile ? "12px" : "50%",
+            right: isMobile ? "12px" : "auto",
+            transform: isMobile ? "none" : "translateX(-50%)",
+            zIndex: 2500,
             display: "flex",
             alignItems: "center",
-            gap: "12px",
-            padding: "14px 18px",
+            gap: isMobile ? "10px" : "12px",
+            padding: isMobile ? "12px 14px" : "14px 18px",
             borderRadius: "16px",
             background:
               toast.type === "success"
@@ -365,20 +369,21 @@ export default function AdminDashboard() {
                 : "linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%)",
             color: "white",
             boxShadow:
-              "0 20px 25px -5px rgba(15, 23, 42, 0.25), 0 8px 10px -6px rgba(15, 23, 42, 0.15)",
+              "0 20px 28px -6px rgba(15, 23, 42, 0.3), 0 8px 12px -6px rgba(15, 23, 42, 0.18)",
             border:
               toast.type === "success"
-                ? "1px solid rgba(16, 185, 129, 0.45)"
-                : "1px solid rgba(248, 113, 113, 0.45)",
-            minWidth: isMobile ? "auto" : "290px",
-            maxWidth: isMobile ? "100%" : "420px",
+                ? "1px solid rgba(16, 185, 129, 0.5)"
+                : "1px solid rgba(248, 113, 113, 0.5)",
+            width: isMobile ? "auto" : "max-content",
+            minWidth: isMobile ? "0" : "310px",
+            maxWidth: isMobile ? "calc(100vw - 24px)" : "min(460px, calc(100vw - 32px))",
             boxSizing: "border-box",
           }}
         >
           <div
             style={{
-              width: "34px",
-              height: "34px",
+              width: isMobile ? "30px" : "34px",
+              height: isMobile ? "30px" : "34px",
               borderRadius: "10px",
               display: "flex",
               alignItems: "center",
@@ -388,7 +393,7 @@ export default function AdminDashboard() {
                   ? "rgba(16, 185, 129, 0.2)"
                   : "rgba(248, 113, 113, 0.2)",
               color: toast.type === "success" ? "#34d399" : "#fca5a5",
-              fontSize: "16px",
+              fontSize: isMobile ? "14px" : "16px",
               fontWeight: "700",
               flexShrink: 0,
             }}
@@ -398,9 +403,9 @@ export default function AdminDashboard() {
           <div style={{ flex: 1, minWidth: 0 }}>
             <div
               style={{
-                fontSize: "11px",
+                fontSize: "10.5px",
                 fontWeight: "700",
-                letterSpacing: "0.04em",
+                letterSpacing: "0.05em",
                 textTransform: "uppercase",
                 color: toast.type === "success" ? "#34d399" : "#fca5a5",
                 marginBottom: "2px",
@@ -410,7 +415,7 @@ export default function AdminDashboard() {
             </div>
             <div
               style={{
-                fontSize: "13.5px",
+                fontSize: isMobile ? "12.5px" : "13.5px",
                 fontWeight: "500",
                 lineHeight: "1.4",
                 wordBreak: "break-word",
@@ -422,6 +427,7 @@ export default function AdminDashboard() {
           <button
             type="button"
             onClick={() => setToast(null)}
+            aria-label="Close notification"
             style={{
               background: "transparent",
               border: "none",
@@ -450,7 +456,8 @@ export default function AdminDashboard() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "16px",
+            padding: isMobile ? "14px" : "20px",
+            boxSizing: "border-box",
           }}
         >
           <div
@@ -460,8 +467,8 @@ export default function AdminDashboard() {
               maxWidth: "420px",
               boxSizing: "border-box",
               background: "white",
-              borderRadius: "24px",
-              padding: isMobile ? "22px" : "28px",
+              borderRadius: isMobile ? "20px" : "24px",
+              padding: isMobile ? "20px" : "28px",
               border: "1px solid #e2e8f0",
               boxShadow: "0 25px 50px -12px rgba(15, 23, 42, 0.35)",
               textAlign: "center",
@@ -469,8 +476,8 @@ export default function AdminDashboard() {
           >
             <div
               style={{
-                width: "56px",
-                height: "56px",
+                width: isMobile ? "48px" : "56px",
+                height: isMobile ? "48px" : "56px",
                 margin: "0 auto 14px auto",
                 borderRadius: "18px",
                 background: "#fef2f2",
@@ -478,7 +485,7 @@ export default function AdminDashboard() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "24px",
+                fontSize: isMobile ? "21px" : "24px",
               }}
             >
               🗑️
@@ -487,7 +494,7 @@ export default function AdminDashboard() {
             <h3
               style={{
                 margin: "0 0 8px 0",
-                fontSize: isMobile ? "18px" : "20px",
+                fontSize: isMobile ? "17.5px" : "20px",
                 fontWeight: "700",
                 color: "#0f172a",
               }}
@@ -498,7 +505,7 @@ export default function AdminDashboard() {
             <p
               style={{
                 margin: "0 0 22px 0",
-                fontSize: "14px",
+                fontSize: isMobile ? "13px" : "14px",
                 color: "#475569",
                 lineHeight: "1.6",
                 wordBreak: "break-word",
@@ -525,13 +532,13 @@ export default function AdminDashboard() {
                 onClick={() => setDeleteTarget(null)}
                 style={{
                   flex: 1,
-                  padding: "12px 16px",
+                  padding: isMobile ? "11px 14px" : "12px 16px",
                   borderRadius: "12px",
                   border: "1px solid #cbd5e1",
                   background: "#f8fafc",
                   color: "#334155",
                   fontWeight: "600",
-                  fontSize: "14px",
+                  fontSize: "13.5px",
                   cursor: deleting ? "not-allowed" : "pointer",
                 }}
               >
@@ -544,7 +551,7 @@ export default function AdminDashboard() {
                 onClick={confirmDelete}
                 style={{
                   flex: 1,
-                  padding: "12px 16px",
+                  padding: isMobile ? "11px 14px" : "12px 16px",
                   borderRadius: "12px",
                   border: "none",
                   background: deleting
@@ -552,7 +559,7 @@ export default function AdminDashboard() {
                     : "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
                   color: "white",
                   fontWeight: "600",
-                  fontSize: "14px",
+                  fontSize: "13.5px",
                   cursor: deleting ? "not-allowed" : "pointer",
                   boxShadow: "0 8px 16px -4px rgba(220, 38, 38, 0.4)",
                 }}
