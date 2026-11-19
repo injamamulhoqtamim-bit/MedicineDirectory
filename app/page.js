@@ -3,8 +3,23 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { initialMedicines, CompanyList } from "./data/medicines";
 
-// এখানে আপনার নিজের ছবির পাথ বা URL দিন (যেমন: "/images/pharma-banner.jpg")
-const HERO_BACKGROUND_IMAGE = "/Smile.png";
+// ফাইলটি public ফোল্ডারের ভেতরে থাকলে নিচের পাথ কাজ করবে (যেমন: "/pharmacist-banner.png" বা "/Smiling Pharmacist Using Smartphone.png")
+const HERO_BACKGROUND_IMAGE = "/Smiling Pharmacist Using Smartphone.png";
+
+function getSafeBackgroundUrl(rawPath) {
+  if (!rawPath || typeof rawPath !== "string") return "";
+  const trimmed = rawPath.trim();
+  if (!trimmed) return "";
+  if (
+    trimmed.startsWith("data:") ||
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://")
+  ) {
+    return trimmed;
+  }
+  const normalized = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  return encodeURI(normalized);
+}
 
 function buildMergedMedicines(dbData) {
   if (!Array.isArray(dbData) || dbData.length === 0) {
@@ -214,7 +229,8 @@ export default function Home() {
     }
   };
 
-  const hasHeroImage = Boolean(HERO_BACKGROUND_IMAGE && HERO_BACKGROUND_IMAGE.trim());
+  const safeHeroUrl = getSafeBackgroundUrl(HERO_BACKGROUND_IMAGE);
+  const hasHeroImage = Boolean(safeHeroUrl);
 
   return (
     <main
@@ -257,31 +273,46 @@ export default function Home() {
           position: "relative",
           overflow: "hidden",
           padding: isMobile ? "24px 16px" : isTablet ? "32px 28px" : "38px 34px",
-          minHeight: isMobile ? "136px" : "164px",
+          minHeight: isMobile ? "144px" : "176px",
           display: "flex",
           alignItems: "center",
           borderRadius: isMobile ? "16px" : "22px",
           boxSizing: "border-box",
           backgroundColor: "#0f172a",
-          backgroundImage: hasHeroImage
-            ? `url("${HERO_BACKGROUND_IMAGE.trim()}")`
-            : "linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 55%, #0284c7 100%)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
           border: "1px solid #e2e8f0",
           boxShadow: "0 12px 28px -10px rgba(15, 23, 42, 0.16)",
         }}
       >
+        {hasHeroImage && (
+          <img
+            src={safeHeroUrl}
+            alt="Sheikh Drugs Pharma Banner"
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+            }}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              objectPosition: "center",
+              pointerEvents: "none",
+              zIndex: 0,
+            }}
+          />
+        )}
+
         {/* Overlay for readable text over any background image */}
         <div
           style={{
             position: "absolute",
             inset: 0,
             background: hasHeroImage
-              ? "linear-gradient(135deg, rgba(15, 23, 42, 0.72) 0%, rgba(15, 23, 42, 0.48) 100%)"
-              : "linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(15, 23, 42, 0.18) 100%)",
+              ? "linear-gradient(135deg, rgba(15, 23, 42, 0.72) 0%, rgba(15, 23, 42, 0.45) 100%)"
+              : "linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 55%, #0284c7 100%)",
             pointerEvents: "none",
+            zIndex: 1,
           }}
         />
 
@@ -289,7 +320,7 @@ export default function Home() {
           className="header-content"
           style={{
             position: "relative",
-            zIndex: 1,
+            zIndex: 2,
             display: "flex",
             alignItems: isMobile ? "flex-start" : "center",
             flexDirection: isMobile ? "column" : "row",
