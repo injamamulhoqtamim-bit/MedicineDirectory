@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB limit
+
+const ALLOWED_MIME_TYPES = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
 
 export async function POST(request) {
   try {
@@ -14,23 +22,41 @@ export async function POST(request) {
       );
     }
 
+    const mimeType = String(file.type || "").toLowerCase();
+    if (!ALLOWED_MIME_TYPES.has(mimeType)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Only JPG, PNG, WEBP, or GIF images are allowed",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (typeof file.size === "number" && file.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Image size must be 2MB or smaller",
+        },
+        { status: 400 }
+      );
+    }
+
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    if (bytes.byteLength > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Image size must be 2MB or smaller",
+        },
+        { status: 400 }
+      );
+    }
 
-    const ext = path.extname(file.name) || ".jpg";
-    const baseName = path
-      .basename(file.name, ext)
-      .replace(/[^a-zA-Z0-9_-]/g, "_")
-      .slice(0, 40);
-    const filename = `${Date.now()}_${baseName}${ext}`;
+    const base64 = Buffer.from(bytes).toString("base64");
+    const imageUrl = `data:${mimeType};base64,${base64}`;
 
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
-
-    const filePath = path.join(uploadDir, filename);
-    await writeFile(filePath, buffer);
-
-    const imageUrl = `/uploads/${filename}`;
     return NextResponse.json({ success: true, imageUrl }, { status: 201 });
   } catch (error) {
     console.error("Upload error:", error);
