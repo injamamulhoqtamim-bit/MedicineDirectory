@@ -276,6 +276,7 @@ export default function Home() {
           minHeight: isMobile ? "144px" : "176px",
           display: "flex",
           alignItems: "center",
+          justifyContent: "center",
           borderRadius: isMobile ? "16px" : "22px",
           boxSizing: "border-box",
           backgroundColor: "#0f172a",
@@ -309,7 +310,7 @@ export default function Home() {
             position: "absolute",
             inset: 0,
             background: hasHeroImage
-              ? "linear-gradient(135deg, rgba(15, 23, 42, 0.72) 0%, rgba(15, 23, 42, 0.45) 100%)"
+              ? "linear-gradient(135deg, rgba(15, 23, 42, 0.65) 0%, rgba(15, 23, 42, 0.42) 100%)"
               : "linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 55%, #0284c7 100%)",
             pointerEvents: "none",
             zIndex: 1,
@@ -322,72 +323,41 @@ export default function Home() {
             position: "relative",
             zIndex: 2,
             display: "flex",
-            alignItems: isMobile ? "flex-start" : "center",
-            flexDirection: isMobile ? "column" : "row",
-            gap: isMobile ? "12px" : "16px",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
             width: "100%",
+            maxWidth: "760px",
           }}
         >
-          <span
+          <h1
+            className="header-title"
             style={{
-              width: isMobile ? "42px" : "50px",
-              height: isMobile ? "42px" : "50px",
-              borderRadius: "14px",
-              background:
-                "linear-gradient(135deg, #1d4ed8 0%, #2563eb 55%, #0ea5e9 100%)",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow:
-                "0 8px 18px -4px rgba(37, 99, 235, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.35)",
-              border: "1px solid rgba(255, 255, 255, 0.25)",
-              flexShrink: 0,
+              fontSize: isMobile ? "22px" : isTablet ? "26px" : "30px",
+              fontWeight: "800",
+              lineHeight: "1.25",
+              margin: "0 0 6px 0",
+              color: "#ffffff",
+              textShadow: "0 2px 10px rgba(0, 0, 0, 0.4)",
+              wordBreak: "break-word",
             }}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width={isMobile ? "22" : "26"}
-              height={isMobile ? "22" : "26"}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#ffffff"
-              strokeWidth="2.1"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
-              <path d="m8.5 8.5 7 7" />
-              <circle cx="18" cy="6" r="1" fill="#ffffff" stroke="none" />
-            </svg>
-          </span>
-
-          <div style={{ minWidth: 0 }}>
-            <h1
-              className="header-title"
-              style={{
-                fontSize: isMobile ? "21px" : isTablet ? "25px" : "29px",
-                fontWeight: "800",
-                lineHeight: "1.25",
-                margin: "0 0 6px 0",
-                color: "#ffffff",
-                textShadow: "0 2px 10px rgba(0, 0, 0, 0.35)",
-              }}
-            >
-              Sheikh Drugs Pharma
-            </h1>
-            <p
-              className="header-subtitle"
-              style={{
-                fontSize: isMobile ? "13.5px" : "15px",
-                lineHeight: "1.5",
-                margin: 0,
-                color: "rgba(255, 255, 255, 0.92)",
-                textShadow: "0 1px 6px rgba(0, 0, 0, 0.3)",
-              }}
-            >
-              আপনার প্রয়োজনীয় ঔষধ এবং স্বনামধন্য কোম্পানির তালিকা এক জায়গায়
-            </p>
-          </div>
+            Sheikh Drugs Pharma
+          </h1>
+          <p
+            className="header-subtitle"
+            style={{
+              fontSize: isMobile ? "13.5px" : "15px",
+              lineHeight: "1.5",
+              margin: 0,
+              color: "rgba(255, 255, 255, 0.94)",
+              textShadow: "0 1px 6px rgba(0, 0, 0, 0.35)",
+              wordBreak: "break-word",
+            }}
+          >
+            আপনার প্রয়োজনীয় ঔষধ এবং স্বনামধন্য কোম্পানির তালিকা এক জায়গায়
+          </p>
         </div>
       </div>
 
