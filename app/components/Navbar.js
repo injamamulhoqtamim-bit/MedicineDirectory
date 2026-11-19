@@ -119,13 +119,13 @@ export default function Navbar() {
           height: isMobile ? "36px" : "42px",
           borderRadius: isMobile ? "11px" : "13px",
           background:
-            "linear-gradient(135deg, #1d4ed8 0%, #2563eb 55%, #0ea5e9 100%)",
+            "linear-gradient(135deg, #0ea5e9 0%, #2563eb 55%, #38bdf8 100%)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           boxShadow:
-            "0 8px 18px -4px rgba(37, 99, 235, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.35)",
-          border: "1px solid rgba(255, 255, 255, 0.3)",
+            "0 8px 18px -4px rgba(14, 165, 233, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.45)",
+          border: "1px solid rgba(255, 255, 255, 0.35)",
           flexShrink: 0,
         }}
       >
@@ -136,7 +136,7 @@ export default function Navbar() {
           viewBox="0 0 24 24"
           fill="none"
           stroke="#ffffff"
-          strokeWidth="2.1"
+          strokeWidth="2.2"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
@@ -157,14 +157,12 @@ export default function Navbar() {
         <span
           style={{
             margin: 0,
-            background:
-              "linear-gradient(135deg, #0f172a 0%, #1d4ed8 65%, #0284c7 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
+            color: "#ffffff",
             fontSize: isMobile ? "15px" : isTablet ? "17.5px" : "19.5px",
             fontWeight: "800",
-            letterSpacing: "-0.025em",
+            letterSpacing: "-0.02em",
             whiteSpace: "nowrap",
+            textShadow: "0 2px 8px rgba(0, 0, 0, 0.25)",
           }}
         >
           Sheikh Drugs Pharma
@@ -174,9 +172,9 @@ export default function Navbar() {
             style={{
               fontSize: "10.5px",
               fontWeight: "700",
-              letterSpacing: "0.06em",
+              letterSpacing: "0.07em",
               textTransform: "uppercase",
-              color: "#475569",
+              color: "#bae6fd",
               marginTop: "2px",
               whiteSpace: "nowrap",
             }}
@@ -196,20 +194,18 @@ export default function Navbar() {
         justifyContent: "space-between",
         alignItems: isMobile ? "stretch" : "center",
         gap: isMobile ? "10px" : isTablet ? "12px" : "16px",
-        padding: isMobile ? "10px 12px" : isTablet ? "12px 18px" : "13px 24px",
+        padding: isMobile ? "11px 13px" : isTablet ? "12px 18px" : "14px 24px",
         background:
-          "linear-gradient(135deg, rgba(240, 249, 255, 0.96) 0%, rgba(239, 246, 255, 0.95) 50%, rgba(248, 250, 252, 0.97) 100%)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
+          "linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #1d4ed8 100%)",
         boxShadow:
-          "0 14px 30px -8px rgba(29, 78, 216, 0.12), 0 4px 12px -4px rgba(15, 23, 42, 0.05)",
-        borderRadius: isMobile ? "15px" : "20px",
+          "0 16px 32px -8px rgba(15, 23, 42, 0.28), 0 6px 14px -4px rgba(29, 78, 216, 0.2)",
+        borderRadius: isMobile ? "16px" : "20px",
         marginTop: isMobile ? "8px" : "14px",
         marginBottom: isMobile ? "12px" : "20px",
         position: "sticky",
         top: isMobile ? "8px" : "14px",
         zIndex: 1000,
-        border: "1px solid rgba(191, 219, 254, 0.9)",
+        border: "1px solid rgba(147, 197, 253, 0.35)",
         boxSizing: "border-box",
         width: "100%",
         maxWidth: "100%",
@@ -234,16 +230,16 @@ export default function Navbar() {
               type="button"
               onClick={() => router.push("/requested")}
               style={{
-                background: "#ffffff",
-                border: "1px solid #bfdbfe",
-                padding: "8px 9px",
+                background: "rgba(255, 255, 255, 0.14)",
+                border: "1px solid rgba(255, 255, 255, 0.28)",
+                padding: "8px 10px",
                 borderRadius: "11px",
                 cursor: "pointer",
                 position: "relative",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0 3px 8px rgba(37, 99, 235, 0.08)",
+                boxShadow: "0 4px 10px rgba(0, 0, 0, 0.15)",
               }}
               title="Requested Medicines"
               aria-label="Requested Medicines"
@@ -254,8 +250,8 @@ export default function Navbar() {
                 height="18"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#1d4ed8"
-                strokeWidth="2.1"
+                stroke="#ffffff"
+                strokeWidth="2.2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
@@ -270,7 +266,7 @@ export default function Navbar() {
                     right: "-6px",
                     background:
                       "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
-                    color: "white",
+                    color: "#ffffff",
                     fontSize: "10.5px",
                     minWidth: "19px",
                     height: "19px",
@@ -280,7 +276,7 @@ export default function Navbar() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    border: "2px solid #ffffff",
+                    border: "2px solid #0f172a",
                     boxSizing: "border-box",
                   }}
                 >
@@ -302,11 +298,11 @@ export default function Navbar() {
           maxWidth: isMobile ? "100%" : isTablet ? "320px" : "450px",
           width: "100%",
           minWidth: 0,
-          background: searchFocused ? "#ffffff" : "rgba(255, 255, 255, 0.88)",
-          border: searchFocused ? "1px solid #2563eb" : "1px solid #bfdbfe",
+          background: "#ffffff",
+          border: searchFocused ? "2px solid #38bdf8" : "1px solid #e2e8f0",
           boxShadow: searchFocused
-            ? "0 0 0 3px rgba(37, 99, 235, 0.16)"
-            : "0 2px 6px rgba(15, 23, 42, 0.03)",
+            ? "0 0 0 4px rgba(56, 189, 248, 0.28)"
+            : "0 4px 12px rgba(0, 0, 0, 0.12)",
           borderRadius: "13px",
           padding: isMobile ? "3px 5px 3px 10px" : "4px 6px 4px 12px",
           boxSizing: "border-box",
@@ -320,8 +316,8 @@ export default function Navbar() {
           height="15"
           viewBox="0 0 24 24"
           fill="none"
-          stroke={searchFocused ? "#2563eb" : "#475569"}
-          strokeWidth="2.2"
+          stroke={searchFocused ? "#1d4ed8" : "#475569"}
+          strokeWidth="2.3"
           strokeLinecap="round"
           strokeLinejoin="round"
           style={{ flexShrink: 0 }}
@@ -345,6 +341,7 @@ export default function Navbar() {
             background: "transparent",
             outline: "none",
             fontSize: isMobile ? "13px" : "14px",
+            fontWeight: "500",
             color: "#0f172a",
             padding: isMobile ? "5px 2px" : "6px 2px",
           }}
@@ -356,8 +353,8 @@ export default function Navbar() {
             onClick={handleClearSearch}
             aria-label="Clear search"
             style={{
-              background: "#dbeafe",
-              color: "#1d4ed8",
+              background: "#e0f2fe",
+              color: "#0369a1",
               border: "none",
               borderRadius: "50%",
               width: "22px",
@@ -382,13 +379,13 @@ export default function Navbar() {
             color: "#ffffff",
             border: "none",
             borderRadius: "10px",
-            padding: isMobile ? "6px 11px" : "7px 15px",
-            fontSize: isMobile ? "12px" : "12.5px",
-            fontWeight: "600",
+            padding: isMobile ? "6px 12px" : "7px 16px",
+            fontSize: isMobile ? "12px" : "13px",
+            fontWeight: "700",
             cursor: "pointer",
             whiteSpace: "nowrap",
             flexShrink: 0,
-            boxShadow: "0 4px 10px -2px rgba(37, 99, 235, 0.35)",
+            boxShadow: "0 4px 10px -2px rgba(29, 78, 216, 0.45)",
           }}
         >
           Search
@@ -405,10 +402,12 @@ export default function Navbar() {
             onMouseLeave={() => setHoveredBtn(false)}
             style={{
               background: hoveredBtn
-                ? "linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)"
-                : "#ffffff",
-              border: hoveredBtn ? "1px solid #60a5fa" : "1px solid #bfdbfe",
-              padding: isTablet ? "9px 11px" : "10px 14px",
+                ? "#ffffff"
+                : "rgba(255, 255, 255, 0.14)",
+              border: hoveredBtn
+                ? "1px solid #ffffff"
+                : "1px solid rgba(255, 255, 255, 0.3)",
+              padding: isTablet ? "9px 12px" : "10px 15px",
               borderRadius: "14px",
               cursor: "pointer",
               position: "relative",
@@ -418,8 +417,8 @@ export default function Navbar() {
               justifyContent: "center",
               transition: "all 0.2s ease",
               boxShadow: hoveredBtn
-                ? "0 8px 18px -4px rgba(37, 99, 235, 0.25)"
-                : "0 2px 6px rgba(37, 99, 235, 0.08)",
+                ? "0 10px 20px -4px rgba(0, 0, 0, 0.25)"
+                : "0 4px 10px rgba(0, 0, 0, 0.12)",
             }}
             title="Requested Medicines"
             aria-label="Requested Medicines"
@@ -430,8 +429,8 @@ export default function Navbar() {
               height="19"
               viewBox="0 0 24 24"
               fill="none"
-              stroke={hoveredBtn ? "#1d4ed8" : "#2563eb"}
-              strokeWidth="2.1"
+              stroke={hoveredBtn ? "#1d4ed8" : "#ffffff"}
+              strokeWidth="2.2"
               strokeLinecap="round"
               strokeLinejoin="round"
             >
@@ -444,7 +443,7 @@ export default function Navbar() {
                 style={{
                   fontSize: "13px",
                   fontWeight: "700",
-                  color: hoveredBtn ? "#1e40af" : "#1e293b",
+                  color: hoveredBtn ? "#0f172a" : "#ffffff",
                   whiteSpace: "nowrap",
                 }}
               >
@@ -460,7 +459,7 @@ export default function Navbar() {
                   right: "-6px",
                   background:
                     "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
-                  color: "white",
+                  color: "#ffffff",
                   fontSize: "11px",
                   minWidth: "20px",
                   height: "20px",
@@ -470,8 +469,8 @@ export default function Navbar() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  boxShadow: "0 4px 10px rgba(220, 38, 38, 0.35)",
-                  border: "2px solid #ffffff",
+                  boxShadow: "0 4px 10px rgba(220, 38, 38, 0.45)",
+                  border: "2px solid #0f172a",
                   boxSizing: "border-box",
                 }}
               >
