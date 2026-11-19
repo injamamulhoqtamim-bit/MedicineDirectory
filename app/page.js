@@ -62,6 +62,8 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [navbarSearch, setNavbarSearch] = useState("");
   const [selectedCompany, setSelectedCompany] = useState("");
+  const [companyMedQuery, setCompanyMedQuery] = useState("");
+  const [activeCompanyMedSearch, setActiveCompanyMedSearch] = useState("");
   const [medicinesData, setMedicinesData] = useState(initialMedicines);
   const [message, setMessage] = useState("");
   const [viewport, setViewport] = useState("desktop"); // "mobile" | "tablet" | "desktop"
@@ -83,7 +85,20 @@ export default function Home() {
     return () => window.removeEventListener("resize", updateViewport);
   }, []);
 
-  // Navbar থেকে আসা সার্চ ভ্যালু রিসিভ করা
+  const resetAllFilters = useCallback(() => {
+    setSearchTerm("");
+    setNavbarSearch("");
+    setSelectedCompany("");
+    setCompanyMedQuery("");
+    setActiveCompanyMedSearch("");
+    sessionStorage.setItem("medicineSearchTerm", "");
+    window.dispatchEvent(new CustomEvent("navbarSearchSync", { detail: "" }));
+    if (typeof window !== "undefined" && window.location.search) {
+      window.history.replaceState(null, "", "/");
+    }
+  }, []);
+
+  // Navbar থেকে আসা সার্চ ভ্যালু ও রিসেট ইভেন্ট রিসিভ করা
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const urlSearch = params.get("search");
@@ -94,6 +109,8 @@ export default function Home() {
       setSearchTerm(initialSearch);
       setNavbarSearch(initialSearch);
       setSelectedCompany("");
+      setCompanyMedQuery("");
+      setActiveCompanyMedSearch("");
       sessionStorage.setItem("medicineSearchTerm", initialSearch);
       window.dispatchEvent(
         new CustomEvent("navbarSearchSync", { detail: initialSearch })
@@ -101,19 +118,24 @@ export default function Home() {
     }
 
     const handleNavbarSearch = (e) => {
-      const val = e?.detail !== undefined ? String(e.detail) : "";
+      const val = String(e?.detail || "");
       setSearchTerm(val);
       setNavbarSearch(val);
       if (val.trim()) {
         setSelectedCompany("");
+        setCompanyMedQuery("");
+        setActiveCompanyMedSearch("");
       }
     };
 
     window.addEventListener("navbarSearch", handleNavbarSearch);
+    window.addEventListener("resetAllFilters", resetAllFilters);
+
     return () => {
       window.removeEventListener("navbarSearch", handleNavbarSearch);
+      window.removeEventListener("resetAllFilters", resetAllFilters);
     };
-  }, []);
+  }, [resetAllFilters]);
 
   const syncSearchToNavbar = (val) => {
     setSearchTerm(val);
@@ -122,6 +144,16 @@ export default function Home() {
     window.dispatchEvent(
       new CustomEvent("navbarSearchSync", { detail: val })
     );
+  };
+
+  const resetCompanyMedSearch = () => {
+    setCompanyMedQuery("");
+    setActiveCompanyMedSearch("");
+  };
+
+  const handleCompanyMedSearchSubmit = (e) => {
+    e.preventDefault();
+    setActiveCompanyMedSearch(companyMedQuery.trim());
   };
 
   const cacheMedicinesForDetail = useCallback((list) => {
@@ -204,6 +236,7 @@ export default function Home() {
   const isTablet = viewport === "tablet";
   const effectiveSearch = String(navbarSearch || searchTerm || "").trim();
   const searchLower = effectiveSearch.toLowerCase();
+  const companyQueryLower = activeCompanyMedSearch.trim().toLowerCase();
 
   const visibleMedicines = useMemo(() => {
     const q = navbarSearch.trim().toLowerCase();
@@ -222,11 +255,24 @@ export default function Home() {
         return true;
       }
       if (selectedCompany) {
-        return med.company === selectedCompany;
+        if (med.company !== selectedCompany) return false;
+        if (companyQueryLower) {
+          const nameMatch = String(med.name || "")
+            .toLowerCase()
+            .includes(companyQueryLower);
+          const usesMatch = String(med.uses || "")
+            .toLowerCase()
+            .includes(companyQueryLower);
+          const dosageMatch = String(med.dosage || "")
+            .toLowerCase()
+            .includes(companyQueryLower);
+          return nameMatch || usesMatch || dosageMatch;
+        }
+        return true;
       }
       return true;
     });
-  }, [visibleMedicines, searchLower, selectedCompany]);
+  }, [visibleMedicines, searchLower, selectedCompany, companyQueryLower]);
 
   const handleAddToNotification = (e, med) => {
     e.preventDefault();
@@ -255,8 +301,9 @@ export default function Home() {
         width: "100%",
         maxWidth: "1360px",
         margin: "0 auto",
-        padding: isMobile ? "10px" : isTablet ? "18px 16px" : "24px 20px",
+        padding: isMobile ? "10px" : isTablet ? "16px" : "24px 20px",
         boxSizing: "border-box",
+        overflowX: "clip",
       }}
     >
       {message && (
@@ -288,8 +335,8 @@ export default function Home() {
         style={{
           position: "relative",
           overflow: "hidden",
-          padding: isMobile ? "22px 14px" : isTablet ? "30px 24px" : "38px 34px",
-          minHeight: isMobile ? "158px" : "196px",
+          padding: isMobile ? "20px 14px" : isTablet ? "28px 22px" : "38px 34px",
+          minHeight: isMobile ? "150px" : "196px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -351,7 +398,7 @@ export default function Home() {
           <h1
             className="header-title"
             style={{
-              fontSize: isMobile ? "18.5px" : isTablet ? "24px" : "28px",
+              fontSize: isMobile ? "18px" : isTablet ? "23px" : "28px",
               fontWeight: "800",
               lineHeight: "1.3",
               margin: 0,
@@ -364,7 +411,7 @@ export default function Home() {
           </h1>
           <h2
             style={{
-              fontSize: isMobile ? "15.5px" : isTablet ? "20px" : "22px",
+              fontSize: isMobile ? "15px" : isTablet ? "19px" : "22px",
               fontWeight: "700",
               lineHeight: "1.35",
               margin: 0,
@@ -378,7 +425,7 @@ export default function Home() {
           <p
             className="header-subtitle"
             style={{
-              fontSize: isMobile ? "12.5px" : "15px",
+              fontSize: isMobile ? "12px" : "15px",
               lineHeight: "1.5",
               margin: "2px 0 0 0",
               color: "rgba(255, 255, 255, 0.94)",
@@ -391,10 +438,11 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Company Filter Section */}
       <div
         className="filter-section"
         style={{
-          padding: isMobile ? "12px" : "20px",
+          padding: isMobile ? "12px" : isTablet ? "16px" : "20px",
           borderRadius: isMobile ? "16px" : "20px",
           boxSizing: "border-box",
           marginTop: isMobile ? "14px" : "20px",
@@ -427,8 +475,7 @@ export default function Home() {
           <button
             type="button"
             onClick={() => {
-              setSelectedCompany("");
-              syncSearchToNavbar("");
+              resetAllFilters();
             }}
             className={`filter-btn ${
               selectedCompany === "" && !searchLower ? "active" : ""
@@ -452,12 +499,14 @@ export default function Home() {
                 key={index}
                 onClick={() => {
                   setSelectedCompany(company);
+                  resetCompanyMedSearch();
                   syncSearchToNavbar("");
                 }}
                 className={`filter-btn ${isSelected ? "active" : ""}`}
                 style={{
                   fontSize: isMobile ? "11.5px" : "13.5px",
                   padding: isMobile ? "6px 10px" : "8px 14px",
+                  maxWidth: "100%",
                   ...(isSearchMatched
                     ? {
                         backgroundColor: "#dc2626",
@@ -478,14 +527,149 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 4 Cards Per Row across Mobile, Tablet, and Desktop */}
+      {/* Selected Company Medicine Search Bar (Shows above cards when a company is selected) */}
+      {selectedCompany && !searchLower && (
+        <div
+          style={{
+            marginTop: isMobile ? "14px" : "20px",
+            background: "#ffffff",
+            border: "1px solid #e2e8f0",
+            borderRadius: isMobile ? "14px" : "18px",
+            padding: isMobile ? "12px" : "16px 20px",
+            boxShadow: "0 6px 18px -8px rgba(15, 23, 42, 0.06)",
+            boxSizing: "border-box",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "8px",
+              marginBottom: "10px",
+            }}
+          >
+            <span
+              style={{
+                fontSize: isMobile ? "13px" : "14.5px",
+                fontWeight: "700",
+                color: "#0f172a",
+                wordBreak: "break-word",
+              }}
+            >
+              🏢 {selectedCompany}-এর ওষুধ খুঁজুন ({filteredMedicines.length})
+            </span>
+
+            {activeCompanyMedSearch && (
+              <button
+                type="button"
+                onClick={resetCompanyMedSearch}
+                style={{
+                  background: "#f1f5f9",
+                  color: "#334155",
+                  border: "1px solid #cbd5e1",
+                  borderRadius: "8px",
+                  padding: "4px 10px",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                }}
+              >
+                সব ওষুধ দেখুন
+              </button>
+            )}
+          </div>
+
+          <form
+            onSubmit={handleCompanyMedSearchSubmit}
+            style={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              gap: "8px",
+              alignItems: "stretch",
+            }}
+          >
+            <input
+              type="text"
+              value={companyMedQuery}
+              onChange={(e) => {
+                const val = e.target.value;
+                setCompanyMedQuery(val);
+                setActiveCompanyMedSearch(val.trim());
+              }}
+              placeholder={`${selectedCompany}-এর ওষুধের নাম লিখুন...`}
+              aria-label={`Search medicines in ${selectedCompany}`}
+              style={{
+                flex: 1,
+                minWidth: 0,
+                padding: isMobile ? "9px 12px" : "10px 14px",
+                borderRadius: "11px",
+                border: "1px solid #cbd5e1",
+                background: "#f8fafc",
+                outline: "none",
+                fontSize: isMobile ? "13px" : "14px",
+                color: "#0f172a",
+                boxSizing: "border-box",
+              }}
+            />
+
+            <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+              {companyMedQuery && (
+                <button
+                  type="button"
+                  onClick={resetCompanyMedSearch}
+                  aria-label="Clear company medicine search"
+                  style={{
+                    background: "#e2e8f0",
+                    color: "#334155",
+                    border: "none",
+                    borderRadius: "10px",
+                    padding: isMobile ? "9px 12px" : "10px 13px",
+                    fontSize: "12.5px",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                  }}
+                >
+                  ✕
+                </button>
+              )}
+
+              <button
+                type="submit"
+                style={{
+                  flex: isMobile ? 1 : "initial",
+                  background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "11px",
+                  padding: isMobile ? "9px 14px" : "10px 18px",
+                  fontSize: isMobile ? "12.5px" : "13.5px",
+                  fontWeight: "700",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  boxShadow: "0 4px 12px -3px rgba(29, 78, 216, 0.4)",
+                }}
+              >
+                Search
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Responsive Grid: 2 cards on mobile, 3 on tablet, 4 on desktop */}
       <div
         id="medicine-results-section"
         className="grid-container"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-          gap: isMobile ? "8px" : isTablet ? "12px" : "18px",
+          gridTemplateColumns: isMobile
+            ? "repeat(2, minmax(0, 1fr))"
+            : isTablet
+            ? "repeat(3, minmax(0, 1fr))"
+            : "repeat(4, minmax(0, 1fr))",
+          gap: isMobile ? "10px" : isTablet ? "14px" : "18px",
           marginTop: isMobile ? "14px" : "22px",
           width: "100%",
           boxSizing: "border-box",
@@ -508,8 +692,8 @@ export default function Home() {
                 onClick={() => primeMedicineInCache(med)}
                 className="card"
                 style={{
-                  padding: isMobile ? "8px" : isTablet ? "12px" : "16px",
-                  borderRadius: isMobile ? "11px" : "18px",
+                  padding: isMobile ? "10px" : isTablet ? "13px" : "16px",
+                  borderRadius: isMobile ? "13px" : "18px",
                   boxSizing: "border-box",
                   minWidth: 0,
                   display: "flex",
@@ -523,11 +707,11 @@ export default function Home() {
                       style={{
                         position: "relative",
                         width: "100%",
-                        height: isMobile ? "88px" : isTablet ? "120px" : "150px",
+                        height: isMobile ? "104px" : isTablet ? "128px" : "150px",
                         overflow: "hidden",
-                        borderRadius: isMobile ? "8px" : "12px",
+                        borderRadius: isMobile ? "9px" : "12px",
                         background: "#f1f5f9",
-                        marginBottom: isMobile ? "6px" : "10px",
+                        marginBottom: isMobile ? "8px" : "10px",
                       }}
                     >
                       <img
@@ -550,13 +734,13 @@ export default function Home() {
                         <span
                           style={{
                             position: "absolute",
-                            top: isMobile ? "4px" : "7px",
-                            left: isMobile ? "4px" : "7px",
+                            top: isMobile ? "5px" : "7px",
+                            left: isMobile ? "5px" : "7px",
                             background: "rgba(15, 23, 42, 0.86)",
                             color: "#ffffff",
-                            fontSize: isMobile ? "8.5px" : "10.5px",
+                            fontSize: isMobile ? "9.5px" : "10.5px",
                             fontWeight: "700",
-                            padding: isMobile ? "2px 5px" : "3px 7px",
+                            padding: isMobile ? "2px 6px" : "3px 7px",
                             borderRadius: "6px",
                             backdropFilter: "blur(4px)",
                             lineHeight: 1.2,
@@ -575,13 +759,13 @@ export default function Home() {
                         <span
                           style={{
                             position: "absolute",
-                            top: isMobile ? "4px" : "7px",
-                            right: isMobile ? "4px" : "7px",
+                            top: isMobile ? "5px" : "7px",
+                            right: isMobile ? "5px" : "7px",
                             background: "rgba(29, 78, 216, 0.92)",
                             color: "#ffffff",
-                            fontSize: isMobile ? "8.5px" : "10.5px",
+                            fontSize: isMobile ? "9.5px" : "10.5px",
                             fontWeight: "700",
-                            padding: isMobile ? "2px 5px" : "3px 7px",
+                            padding: isMobile ? "2px 6px" : "3px 7px",
                             borderRadius: "6px",
                             backdropFilter: "blur(4px)",
                             lineHeight: 1.2,
@@ -600,13 +784,13 @@ export default function Home() {
                         <span
                           style={{
                             position: "absolute",
-                            bottom: isMobile ? "4px" : "7px",
-                            right: isMobile ? "4px" : "7px",
+                            bottom: isMobile ? "5px" : "7px",
+                            right: isMobile ? "5px" : "7px",
                             background: "rgba(5, 150, 105, 0.94)",
                             color: "#ffffff",
-                            fontSize: isMobile ? "8.5px" : "10.5px",
+                            fontSize: isMobile ? "9.5px" : "10.5px",
                             fontWeight: "700",
-                            padding: isMobile ? "2px 5px" : "3px 7px",
+                            padding: isMobile ? "2px 6px" : "3px 7px",
                             borderRadius: "6px",
                             backdropFilter: "blur(4px)",
                             lineHeight: 1.2,
@@ -624,7 +808,7 @@ export default function Home() {
                   <h3
                     style={{
                       margin: "0 0 4px 0",
-                      fontSize: isMobile ? "11px" : isTablet ? "13.5px" : "16px",
+                      fontSize: isMobile ? "12.5px" : isTablet ? "14px" : "16px",
                       fontWeight: "700",
                       color: "#0f172a",
                       lineHeight: "1.3",
@@ -637,7 +821,7 @@ export default function Home() {
                   <p
                     style={{
                       margin: 0,
-                      fontSize: isMobile ? "9.5px" : isTablet ? "11.5px" : "13px",
+                      fontSize: isMobile ? "10.5px" : isTablet ? "12px" : "13px",
                       lineHeight: "1.35",
                       color: "#475569",
                       wordBreak: "break-word",
@@ -653,8 +837,8 @@ export default function Home() {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "stretch",
-                    gap: isMobile ? "5px" : "8px",
-                    marginTop: isMobile ? "8px" : "14px",
+                    gap: isMobile ? "6px" : "8px",
+                    marginTop: isMobile ? "10px" : "14px",
                     minWidth: 0,
                   }}
                 >
@@ -662,7 +846,7 @@ export default function Home() {
                     className="details-btn"
                     style={{
                       margin: 0,
-                      fontSize: isMobile ? "9.5px" : isTablet ? "11.5px" : "13px",
+                      fontSize: isMobile ? "10.5px" : isTablet ? "11.5px" : "13px",
                       lineHeight: 1.25,
                       display: "inline-flex",
                       alignItems: "center",
@@ -685,9 +869,9 @@ export default function Home() {
                         "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
                       color: "#1d4ed8",
                       border: "1px solid #93c5fd",
-                      padding: isMobile ? "5px 4px" : isTablet ? "6px 8px" : "8px 10px",
-                      borderRadius: isMobile ? "8px" : "11px",
-                      fontSize: isMobile ? "9px" : isTablet ? "11px" : "12px",
+                      padding: isMobile ? "6px 6px" : isTablet ? "7px 8px" : "8px 10px",
+                      borderRadius: isMobile ? "9px" : "11px",
+                      fontSize: isMobile ? "10px" : isTablet ? "11px" : "12px",
                       fontWeight: "700",
                       cursor: "pointer",
                       whiteSpace: "nowrap",
@@ -696,7 +880,7 @@ export default function Home() {
                       display: "inline-flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      gap: isMobile ? "3px" : "5px",
+                      gap: isMobile ? "4px" : "5px",
                       boxShadow:
                         "0 4px 12px -3px rgba(37, 99, 235, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
                       transition: "all 0.18s ease",
@@ -706,8 +890,8 @@ export default function Home() {
                   >
                     <span
                       style={{
-                        width: isMobile ? "13px" : "16px",
-                        height: isMobile ? "13px" : "16px",
+                        width: isMobile ? "14px" : "16px",
+                        height: isMobile ? "14px" : "16px",
                         borderRadius: "4px",
                         background:
                           "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
@@ -735,7 +919,7 @@ export default function Home() {
           <div
             style={{
               textAlign: "center",
-              gridColumn: "span 4",
+              gridColumn: "1 / -1",
               padding: isMobile ? "34px 18px" : "50px",
               background: "white",
               borderRadius: isMobile ? "16px" : "20px",

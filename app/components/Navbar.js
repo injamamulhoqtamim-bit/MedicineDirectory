@@ -215,6 +215,16 @@ export default function Navbar() {
     broadcastSearch("");
   };
 
+  const handleLogoOrBrandClick = () => {
+    setSearchQuery("");
+    setHoveredIndex(-1);
+    setDropdownOpen(false);
+    sessionStorage.setItem("medicineSearchTerm", "");
+    window.dispatchEvent(new CustomEvent("resetAllFilters"));
+    window.dispatchEvent(new CustomEvent("navbarSearch", { detail: "" }));
+    router.push("/");
+  };
+
   // যদি রুটটি /admin দিয়ে শুরু হয়, তবে Navbar দেখাবে না
   if (pathname && pathname.startsWith("/admin")) {
     return null;
@@ -227,14 +237,11 @@ export default function Navbar() {
   const renderBrandLogo = () => (
     <button
       type="button"
-      onClick={() => {
-        handleClearSearch();
-        router.push("/");
-      }}
+      onClick={handleLogoOrBrandClick}
       style={{
         display: "flex",
         alignItems: "center",
-        gap: isMobile ? "9px" : "11px",
+        gap: isMobile ? "8px" : "11px",
         background: "transparent",
         border: "none",
         padding: "2px 0",
@@ -247,9 +254,9 @@ export default function Navbar() {
       {/* Premium Pharma Emblem Logo */}
       <span
         style={{
-          width: isMobile ? "36px" : "42px",
-          height: isMobile ? "36px" : "42px",
-          borderRadius: isMobile ? "11px" : "13px",
+          width: isMobile ? "34px" : "42px",
+          height: isMobile ? "34px" : "42px",
+          borderRadius: isMobile ? "10px" : "13px",
           background:
             "linear-gradient(135deg, #0ea5e9 0%, #2563eb 55%, #38bdf8 100%)",
           display: "flex",
@@ -263,8 +270,8 @@ export default function Navbar() {
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width={isMobile ? "20" : "23"}
-          height={isMobile ? "20" : "23"}
+          width={isMobile ? "18" : "23"}
+          height={isMobile ? "18" : "23"}
           viewBox="0 0 24 24"
           fill="none"
           stroke="#ffffff"
@@ -290,7 +297,7 @@ export default function Navbar() {
           style={{
             margin: 0,
             color: "#ffffff",
-            fontSize: isMobile ? "15px" : isTablet ? "17.5px" : "19.5px",
+            fontSize: isMobile ? "14.5px" : isTablet ? "17px" : "19.5px",
             fontWeight: "800",
             letterSpacing: "-0.02em",
             whiteSpace: "nowrap",
@@ -326,7 +333,7 @@ export default function Navbar() {
         justifyContent: "space-between",
         alignItems: isMobile ? "stretch" : "center",
         gap: isMobile ? "10px" : isTablet ? "12px" : "16px",
-        padding: isMobile ? "11px 13px" : isTablet ? "12px 18px" : "14px 24px",
+        padding: isMobile ? "10px 12px" : isTablet ? "12px 16px" : "14px 24px",
         background:
           "linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #1d4ed8 100%)",
         boxShadow:
@@ -426,7 +433,7 @@ export default function Navbar() {
         style={{
           position: "relative",
           flex: isMobile ? "initial" : 1,
-          maxWidth: isMobile ? "100%" : isTablet ? "340px" : "460px",
+          maxWidth: isMobile ? "100%" : isTablet ? "310px" : "450px",
           width: "100%",
           minWidth: 0,
         }}
@@ -469,7 +476,7 @@ export default function Navbar() {
               border: "none",
               background: "transparent",
               outline: "none",
-              fontSize: isMobile ? "14px" : "15px",
+              fontSize: isMobile ? "13.5px" : "15px",
               fontWeight: "400",
               color: "#1e293b",
               padding: isMobile ? "5px 2px" : "6px 2px",
@@ -515,7 +522,7 @@ export default function Navbar() {
               borderTop: "none",
               borderRadius: "0 0 12px 12px",
               boxShadow: "0 18px 30px -10px rgba(15, 23, 42, 0.22)",
-              maxHeight: "380px",
+              maxHeight: isMobile ? "260px" : "380px",
               overflowY: "auto",
               padding: "6px 0",
               zIndex: 1500,
@@ -543,8 +550,8 @@ export default function Navbar() {
                       display: "flex",
                       alignItems: "baseline",
                       justifyContent: "space-between",
-                      gap: "12px",
-                      padding: "9px 16px",
+                      gap: "10px",
+                      padding: isMobile ? "8px 12px" : "9px 16px",
                       border: "none",
                       background: isHovered ? "#f0fdfa" : "#ffffff",
                       cursor: "pointer",
@@ -558,11 +565,12 @@ export default function Navbar() {
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         lineHeight: 1.35,
+                        minWidth: 0,
                       }}
                     >
                       <span
                         style={{
-                          fontSize: "15.5px",
+                          fontSize: isMobile ? "14px" : "15.5px",
                           fontWeight: "400",
                           color: "#149188",
                         }}
@@ -573,7 +581,7 @@ export default function Navbar() {
                         <span
                           style={{
                             marginLeft: "5px",
-                            fontSize: "12px",
+                            fontSize: isMobile ? "11px" : "12px",
                             fontWeight: "400",
                             color: "#4db6ac",
                           }}
@@ -586,11 +594,14 @@ export default function Navbar() {
                     {med.company && (
                       <span
                         style={{
-                          fontSize: "11px",
+                          fontSize: isMobile ? "10px" : "11px",
                           fontWeight: "500",
                           color: "#94a3b8",
                           whiteSpace: "nowrap",
                           flexShrink: 0,
+                          maxWidth: isMobile ? "36%" : "45%",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
                         }}
                       >
                         {med.company}
