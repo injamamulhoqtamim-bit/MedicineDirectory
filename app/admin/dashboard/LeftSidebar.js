@@ -18,6 +18,38 @@ export default function LeftSidebar({
   setMobileSidebarOpen,
   handleLogout,
 }) {
+  const sidebarWidth = isTablet ? 265 : 315;
+
+  const handleBrandClick = () => {
+    const defaultCompany =
+      (Array.isArray(filteredCompanies) && filteredCompanies[0]) ||
+      (Array.isArray(medicines) && medicines[0]?.company) ||
+      selectedCompany ||
+      "";
+
+    if (defaultCompany) {
+      setSelectedCompany(defaultCompany);
+    }
+    if (typeof setSearchTerm === "function") {
+      setSearchTerm("");
+    }
+    if (typeof setSavedMedicineQuery === "function") {
+      setSavedMedicineQuery("");
+    }
+    if (typeof setActiveMedicineSearch === "function") {
+      setActiveMedicineSearch("");
+    }
+    if (!editingId && typeof setSelectedMedicineName === "function") {
+      setSelectedMedicineName("");
+    }
+    if (isMobile && typeof setMobileSidebarOpen === "function") {
+      setMobileSidebarOpen(false);
+    }
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   const sidebarBody = (
     <>
       <div
@@ -25,18 +57,27 @@ export default function LeftSidebar({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "16px",
+          marginBottom: "14px",
           gap: "8px",
-          paddingBottom: "14px",
+          paddingBottom: "12px",
           borderBottom: "1px solid #e2e8f0",
+          flexShrink: 0,
         }}
       >
-        <div
+        <button
+          type="button"
+          onClick={handleBrandClick}
+          title="Back to top of Admin Dashboard"
           style={{
             display: "flex",
             alignItems: "center",
             gap: "10px",
             minWidth: 0,
+            background: "transparent",
+            border: "none",
+            padding: 0,
+            cursor: "pointer",
+            textAlign: "left",
           }}
         >
           {emblem}
@@ -48,7 +89,7 @@ export default function LeftSidebar({
                   "linear-gradient(135deg, #0f172a 0%, #1d4ed8 70%, #2563eb 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
-                fontSize: "14.5px",
+                fontSize: isTablet ? "13.5px" : "14.5px",
                 fontWeight: "800",
                 lineHeight: 1.2,
                 whiteSpace: "nowrap",
@@ -72,7 +113,7 @@ export default function LeftSidebar({
               Admin Dashboard
             </span>
           </div>
-        </div>
+        </button>
 
         <div
           style={{
@@ -89,10 +130,10 @@ export default function LeftSidebar({
               background: "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)",
               color: "#dc2626",
               border: "1px solid #fca5a5",
-              padding: "9px 16px",
+              padding: isTablet ? "7px 11px" : "9px 15px",
               borderRadius: "12px",
               cursor: "pointer",
-              fontSize: "13.5px",
+              fontSize: isTablet ? "12px" : "13px",
               fontWeight: "700",
               boxShadow: "0 6px 14px -4px rgba(220, 38, 38, 0.25)",
               transition: "all 0.18s ease",
@@ -124,7 +165,7 @@ export default function LeftSidebar({
       </div>
 
       {/* Search Input in Left Sidebar */}
-      <div style={{ marginBottom: "14px", position: "relative" }}>
+      <div style={{ marginBottom: "12px", position: "relative", flexShrink: 0 }}>
         <input
           type="text"
           placeholder="🔍 Search company..."
@@ -168,14 +209,16 @@ export default function LeftSidebar({
         )}
       </div>
 
-      {/* Company List */}
+      {/* Company List (Scrollable inside fixed sidebar) */}
       <div
         style={{
           display: "flex",
           flexDirection: "column",
           gap: "5px",
           overflowY: "auto",
+          overscrollBehavior: "contain",
           flex: 1,
+          minHeight: 0,
           paddingRight: "2px",
         }}
       >
@@ -186,6 +229,11 @@ export default function LeftSidebar({
             color: "#64748b",
             margin: "2px 0 6px 0",
             letterSpacing: "0.03em",
+            position: "sticky",
+            top: 0,
+            background: "#ffffff",
+            paddingBottom: "4px",
+            zIndex: 2,
           }}
         >
           COMPANIES ({filteredCompanies.length})
@@ -229,6 +277,7 @@ export default function LeftSidebar({
                 fontSize: "12.5px",
                 transition: "all 0.15s ease",
                 lineHeight: "1.35",
+                flexShrink: 0,
               }}
             >
               <span style={{ minWidth: 0, wordBreak: "break-word" }}>
@@ -265,10 +314,11 @@ export default function LeftSidebar({
             position: "sticky",
             top: 0,
             zIndex: 40,
+            width: "100%",
             background: "rgba(255, 255, 255, 0.96)",
             backdropFilter: "blur(10px)",
             borderBottom: "1px solid #e2e8f0",
-            padding: "10px 14px",
+            padding: "10px 12px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -283,31 +333,39 @@ export default function LeftSidebar({
               background: "#eff6ff",
               color: "#2563eb",
               border: "1px solid #bfdbfe",
-              padding: "8px 11px",
+              padding: "8px 10px",
               borderRadius: "10px",
               cursor: "pointer",
-              fontSize: "12.5px",
+              fontSize: "12px",
               fontWeight: "700",
               flexShrink: 0,
+              whiteSpace: "nowrap",
             }}
           >
             ☰ Companies
           </button>
 
-          <div
+          <button
+            type="button"
+            onClick={handleBrandClick}
+            title="Back to top of Admin Dashboard"
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "8px",
+              gap: "7px",
               minWidth: 0,
               flex: 1,
               justifyContent: "center",
+              background: "transparent",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
             }}
           >
             {emblem}
             <div
               style={{
-                fontSize: "13px",
+                fontSize: "12.5px",
                 fontWeight: "800",
                 color: "#0f172a",
                 overflow: "hidden",
@@ -315,9 +373,9 @@ export default function LeftSidebar({
                 whiteSpace: "nowrap",
               }}
             >
-              🏢 {selectedCompany}
+              Sheikh Drugs Pharma
             </div>
-          </div>
+          </button>
 
           <button
             type="button"
@@ -326,13 +384,14 @@ export default function LeftSidebar({
               background: "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)",
               color: "#dc2626",
               border: "1px solid #fca5a5",
-              padding: "9px 15px",
-              borderRadius: "12px",
+              padding: "8px 12px",
+              borderRadius: "11px",
               cursor: "pointer",
-              fontSize: "13px",
+              fontSize: "12px",
               fontWeight: "700",
               boxShadow: "0 6px 14px -4px rgba(220, 38, 38, 0.22)",
               flexShrink: 0,
+              whiteSpace: "nowrap",
             }}
           >
             Logout
@@ -360,7 +419,7 @@ export default function LeftSidebar({
               maxWidth: "320px",
               height: "100%",
               background: "white",
-              padding: "18px",
+              padding: "16px",
               display: "flex",
               flexDirection: "column",
               boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2)",
@@ -372,27 +431,39 @@ export default function LeftSidebar({
         </div>
       )}
 
-      {/* Desktop / Tablet Left Sidebar */}
+      {/* Desktop / Tablet Fixed Left Sidebar + Layout Spacer */}
       {!isMobile && (
-        <aside
-          style={{
-            width: isTablet ? "275px" : "315px",
-            minWidth: isTablet ? "255px" : "295px",
-            background: "white",
-            borderRight: "1px solid #e2e8f0",
-            padding: "20px",
-            display: "flex",
-            flexDirection: "column",
-            height: "100vh",
-            position: "sticky",
-            top: 0,
-            boxSizing: "border-box",
-            flexShrink: 0,
-            boxShadow: "4px 0 20px -12px rgba(15, 23, 42, 0.08)",
-          }}
-        >
-          {sidebarBody}
-        </aside>
+        <>
+          <div
+            aria-hidden="true"
+            style={{
+              width: `${sidebarWidth}px`,
+              minWidth: `${sidebarWidth}px`,
+              flexShrink: 0,
+            }}
+          />
+          <aside
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              bottom: 0,
+              width: `${sidebarWidth}px`,
+              height: "100vh",
+              background: "white",
+              borderRight: "1px solid #e2e8f0",
+              padding: isTablet ? "16px" : "20px",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+              boxSizing: "border-box",
+              zIndex: 30,
+              boxShadow: "4px 0 20px -12px rgba(15, 23, 42, 0.08)",
+            }}
+          >
+            {sidebarBody}
+          </aside>
+        </>
       )}
     </>
   );
