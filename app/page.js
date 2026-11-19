@@ -3,6 +3,35 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { initialMedicines, CompanyList } from "./data/medicines";
 
+function buildMergedMedicines(dbData) {
+  if (!Array.isArray(dbData) || dbData.length === 0) {
+    return initialMedicines;
+  }
+
+  const dbIds = new Set(dbData.map((m) => String(m?._id || "")).filter(Boolean));
+  const dbKeys = new Set(
+    dbData.map(
+      (m) =>
+        `${String(m?.name || "").toLowerCase().trim()}__${String(
+          m?.company || ""
+        )
+          .toLowerCase()
+          .trim()}`
+    )
+  );
+
+  const filteredInitial = (initialMedicines || []).filter((item) => {
+    const key = `${String(item?.name || "")
+      .toLowerCase()
+      .trim()}__${String(item?.company || "")
+      .toLowerCase()
+      .trim()}`;
+    return !dbIds.has(String(item?.id || "")) && !dbKeys.has(key);
+  });
+
+  return [...dbData, ...filteredInitial];
+}
+
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCompany, setSelectedCompany] = useState("");
@@ -65,6 +94,16 @@ export default function Home() {
     );
   };
 
+  const cacheMedicinesForDetail = useCallback((list) => {
+    try {
+      if (Array.isArray(list) && list.length > 0) {
+        sessionStorage.setItem("allMedicinesCache", JSON.stringify(list));
+      }
+    } catch {
+      // ignore storage quota errors
+    }
+  }, []);
+
   const fetchMedicines = useCallback(async () => {
     try {
       const res = await fetch("/api/medicines", { cache: "no-store" });
@@ -73,46 +112,63 @@ export default function Home() {
 
       const result = JSON.parse(text);
       if (res.ok && result.success && Array.isArray(result.data)) {
-        const dbIds = new Set(result.data.map((m) => String(m._id)));
-        const dbKeys = new Set(
-          result.data.map(
-            (m) =>
-              `${String(m.name || "").toLowerCase().trim()}__${String(
-                m.company || ""
-              )
-                .toLowerCase()
-                .trim()}`
-          )
-        );
-
-        const filteredInitial = initialMedicines.filter((item) => {
-          const key = `${String(item.name || "")
-            .toLowerCase()
-            .trim()}__${String(item.company || "")
-            .toLowerCase()
-            .trim()}`;
-          return !dbIds.has(String(item.id)) && !dbKeys.has(key);
-        });
-
-        setMedicinesData([...result.data, ...filteredInitial]);
+        const merged = buildMergedMedicines(result.data);
+        setMedicinesData(merged);
+        cacheMedicinesForDetail(merged);
       }
     } catch (err) {
       console.error("Failed to fetch medicines:", err);
     }
-  }, []);
+  }, [cacheMedicinesForDetail]);
 
   useEffect(() => {
+    try {
+      const cached = JSON.parse(
+        sessionStorage.getItem("allMedicinesCache") || "null"
+      );
+      if (Array.isArray(cached) && cached.length > 0) {
+        setMedicinesData(cached);
+      } else {
+        cacheMedicinesForDetail(initialMedicines);
+      }
+    } catch {
+      // ignore storage errors
+    }
+
     fetchMedicines();
 
-    const handleFocus = () => {
-      fetchMedicines();
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchMedicines();
+      }
     };
 
-    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
-      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [fetchMedicines]);
+  }, [fetchMedicines, cacheMedicinesForDetail]);
+
+  const primeMedicineInCache = (med) => {
+    try {
+      const existing = JSON.parse(
+        sessionStorage.getItem("allMedicinesCache") || "[]"
+      );
+      const list = Array.isArray(existing) ? existing : [];
+      const targetId = String(med?._id || med?.id || "");
+      if (!targetId) return;
+
+      const filtered = list.filter(
+        (item) => String(item?._id || item?.id || "") !== targetId
+      );
+      sessionStorage.setItem(
+        "allMedicinesCache",
+        JSON.stringify([med, ...filtered])
+      );
+    } catch {
+      // ignore storage errors
+    }
+  };
 
   const isMobile = viewport === "mobile";
   const isTablet = viewport === "tablet";
@@ -173,11 +229,12 @@ export default function Home() {
             bottom: isMobile ? "14px" : "20px",
             right: isMobile ? "14px" : "20px",
             left: isMobile ? "14px" : "auto",
-            background: "#10b981",
+            background: "#0f172a",
             color: "white",
+            border: "1px solid #10b981",
             padding: "12px 18px",
-            borderRadius: "12px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            borderRadius: "14px",
+            boxShadow: "0 12px 24px -6px rgba(15, 23, 42, 0.25)",
             zIndex: 1000,
             fontWeight: "600",
             fontSize: isMobile ? "13px" : "14px",
@@ -188,35 +245,84 @@ export default function Home() {
         </div>
       )}
 
+      {/* Premium Header Card with Sheikh Drugs Pharma Logo */}
       <div
         className="header-card"
         style={{
-          padding: isMobile ? "20px 16px" : "28px 24px",
-          borderRadius: isMobile ? "16px" : "20px",
+          padding: isMobile ? "20px 16px" : "28px 28px",
+          borderRadius: isMobile ? "16px" : "22px",
           boxSizing: "border-box",
+          background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+          border: "1px solid #e2e8f0",
+          boxShadow: "0 10px 25px -10px rgba(15, 23, 42, 0.06)",
         }}
       >
-        <div className="header-content">
-          <h1
-            className="header-title"
+        <div
+          className="header-content"
+          style={{
+            display: "flex",
+            alignItems: isMobile ? "flex-start" : "center",
+            flexDirection: isMobile ? "column" : "row",
+            gap: isMobile ? "12px" : "16px",
+          }}
+        >
+          <span
             style={{
-              fontSize: isMobile ? "22px" : isTablet ? "26px" : "30px",
-              lineHeight: "1.3",
-              margin: "0 0 6px 0",
+              width: isMobile ? "42px" : "50px",
+              height: isMobile ? "42px" : "50px",
+              borderRadius: "14px",
+              background:
+                "linear-gradient(135deg, #1d4ed8 0%, #2563eb 55%, #0ea5e9 100%)",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow:
+                "0 8px 18px -4px rgba(37, 99, 235, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.35)",
+              flexShrink: 0,
             }}
           >
-            💊 Medicine Directory
-          </h1>
-          <p
-            className="header-subtitle"
-            style={{
-              fontSize: isMobile ? "13.5px" : "15px",
-              lineHeight: "1.5",
-              margin: 0,
-            }}
-          >
-            আপনার প্রয়োজনীয় ঔষধ এবং স্বনামধন্য কোম্পানির তালিকা এক জায়গায়
-          </p>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={isMobile ? "22" : "26"}
+              height={isMobile ? "22" : "26"}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="2.1"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
+              <path d="m8.5 8.5 7 7" />
+              <circle cx="18" cy="6" r="1" fill="#ffffff" stroke="none" />
+            </svg>
+          </span>
+
+          <div style={{ minWidth: 0 }}>
+            <h1
+              className="header-title"
+              style={{
+                fontSize: isMobile ? "21px" : isTablet ? "25px" : "29px",
+                fontWeight: "800",
+                lineHeight: "1.25",
+                margin: "0 0 6px 0",
+                color: "#0f172a",
+              }}
+            >
+              Sheikh Drugs Pharma
+            </h1>
+            <p
+              className="header-subtitle"
+              style={{
+                fontSize: isMobile ? "13.5px" : "15px",
+                lineHeight: "1.5",
+                margin: 0,
+                color: "#475569",
+              }}
+            >
+              আপনার প্রয়োজনীয় ঔষধ এবং স্বনামধন্য কোম্পানির তালিকা এক জায়গায়
+            </p>
+          </div>
         </div>
       </div>
 
@@ -227,6 +333,9 @@ export default function Home() {
           borderRadius: isMobile ? "16px" : "20px",
           boxSizing: "border-box",
           marginTop: isMobile ? "16px" : "20px",
+          background: "#ffffff",
+          border: "1px solid #e2e8f0",
+          boxShadow: "0 8px 20px -10px rgba(15, 23, 42, 0.05)",
         }}
       >
         <h3
@@ -236,6 +345,8 @@ export default function Home() {
             lineHeight: "1.45",
             marginTop: 0,
             marginBottom: "12px",
+            color: "#0f172a",
+            fontWeight: "700",
           }}
         >
           কোম্পানি অনুযায়ী ফিল্টার করুন ({CompanyList.length} টি কোম্পানি):
@@ -320,6 +431,10 @@ export default function Home() {
               <Link
                 key={uniqueId}
                 href={`/medicine/${uniqueId}`}
+                prefetch={true}
+                onMouseEnter={() => primeMedicineInCache(med)}
+                onTouchStart={() => primeMedicineInCache(med)}
+                onClick={() => primeMedicineInCache(med)}
                 className="card"
                 style={{
                   padding: isMobile ? "16px" : "20px",
@@ -337,6 +452,7 @@ export default function Home() {
                       <img
                         src={med.image}
                         alt={med.name}
+                        decoding="async"
                         onError={(e) => {
                           e.currentTarget.style.display = "none";
                         }}
@@ -344,7 +460,7 @@ export default function Home() {
                           width: "100%",
                           height: isMobile ? "135px" : "150px",
                           objectFit: "cover",
-                          borderRadius: "10px",
+                          borderRadius: "12px",
                           display: "block",
                         }}
                       />
@@ -354,6 +470,8 @@ export default function Home() {
                     style={{
                       margin: "0 0 6px 0",
                       fontSize: isMobile ? "16px" : "18px",
+                      fontWeight: "700",
+                      color: "#0f172a",
                       lineHeight: "1.35",
                       wordBreak: "break-word",
                     }}
@@ -365,6 +483,7 @@ export default function Home() {
                       margin: 0,
                       fontSize: isMobile ? "13px" : "14px",
                       lineHeight: "1.45",
+                      color: "#475569",
                       wordBreak: "break-word",
                     }}
                   >
@@ -399,7 +518,7 @@ export default function Home() {
                       color: "#2563eb",
                       border: "1px solid #dbeafe",
                       padding: isMobile ? "6px 10px" : "7px 12px",
-                      borderRadius: "8px",
+                      borderRadius: "9px",
                       fontSize: "12px",
                       fontWeight: "600",
                       cursor: "pointer",
