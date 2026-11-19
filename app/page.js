@@ -328,22 +328,22 @@ export default function Home() {
             justifyContent: "center",
             textAlign: "center",
             width: "100%",
-            maxWidth: "760px",
+            maxWidth: "780px",
           }}
         >
           <h1
             className="header-title"
             style={{
-              fontSize: isMobile ? "22px" : isTablet ? "26px" : "30px",
+              fontSize: isMobile ? "20px" : isTablet ? "25px" : "29px",
               fontWeight: "800",
-              lineHeight: "1.25",
+              lineHeight: "1.3",
               margin: "0 0 6px 0",
               color: "#ffffff",
               textShadow: "0 2px 10px rgba(0, 0, 0, 0.4)",
               wordBreak: "break-word",
             }}
           >
-            Sheikh Drugs Pharma
+            ঔষধ / কোম্পানির নাম সার্চ করুন • ঔষধ সম্পর্কে জানুন
           </h1>
           <p
             className="header-subtitle"
@@ -356,7 +356,7 @@ export default function Home() {
               wordBreak: "break-word",
             }}
           >
-            আপনার প্রয়োজনীয় ঔষধ এবং স্বনামধন্য কোম্পানির তালিকা এক জায়গায়
+            ব্যবহার, খাওয়ার নিয়ম ও পার্শ্বপ্রতিক্রিয়ার সঠিক তথ্য সহজেই খুঁজুন
           </p>
         </div>
       </div>
@@ -551,7 +551,7 @@ export default function Home() {
                     ডিটেইলস দেখুন <span>→</span>
                   </span>
 
-                  {/* Premium Original "➕ নাই? সিলেক্ট করুন" Button */}
+                  {/* Premium Original "নাই? সিলেক্ট করুন" Button */}
                   <button
                     type="button"
                     onClick={(e) => handleAddToNotification(e, med)}
