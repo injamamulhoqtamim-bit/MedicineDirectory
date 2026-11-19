@@ -4,10 +4,13 @@ const MedicineSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
     company: { type: String, required: true, trim: true },
-    image: { type: String, trim: true, default: "" },
-    uses: { type: String, trim: true, default: "" },
-    dosage: { type: String, trim: true, default: "" },
-    sideEffects: { type: String, trim: true, default: "" },
+    image: { type: String, default: "" },
+    unitPrice: { type: String, default: "" },
+    stripPrice: { type: String, default: "" },
+    boxPrice: { type: String, default: "" },
+    uses: { type: String, default: "" },
+    dosage: { type: String, default: "" },
+    sideEffects: { type: String, default: "" },
   },
   { timestamps: true }
 );

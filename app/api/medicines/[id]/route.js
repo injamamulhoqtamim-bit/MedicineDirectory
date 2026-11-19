@@ -47,6 +47,15 @@ export async function PUT(request, context) {
     if (body?.image !== undefined) {
       updateFields.image = String(body.image || "").trim();
     }
+    if (body?.unitPrice !== undefined) {
+      updateFields.unitPrice = String(body.unitPrice ?? "").trim();
+    }
+    if (body?.stripPrice !== undefined) {
+      updateFields.stripPrice = String(body.stripPrice ?? "").trim();
+    }
+    if (body?.boxPrice !== undefined) {
+      updateFields.boxPrice = String(body.boxPrice ?? "").trim();
+    }
     if (body?.uses !== undefined) {
       updateFields.uses = String(body.uses || "").trim();
     }

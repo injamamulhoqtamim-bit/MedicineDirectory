@@ -46,7 +46,7 @@ export default function AdminLogin() {
         }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
       if (res.ok && data.success) {
         localStorage.setItem("isAdminLoggedIn", "true");
@@ -55,7 +55,7 @@ export default function AdminLogin() {
         setError(data.error || "Email ba password vul hoyeche!");
         setSubmitting(false);
       }
-    } catch (err) {
+    } catch {
       setError("Server-e connect kora jayni!");
       setSubmitting(false);
     }
@@ -68,10 +68,13 @@ export default function AdminLogin() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        minHeight: "100vh",
+        minHeight: "100dvh",
         width: "100%",
+        maxWidth: "100%",
+        margin: 0,
         padding: isMobile ? "14px" : isTablet ? "24px 20px" : "32px 24px",
         boxSizing: "border-box",
+        overflowX: "hidden",
         background:
           "linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #1d4ed8 100%)",
       }}
@@ -218,6 +221,7 @@ export default function AdminLogin() {
         >
           <div>
             <label
+              htmlFor="admin-email"
               style={{
                 display: "block",
                 fontSize: "13px",
@@ -229,7 +233,9 @@ export default function AdminLogin() {
               Email
             </label>
             <input
+              id="admin-email"
               type="email"
+              autoComplete="email"
               placeholder="Enter admin email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -251,6 +257,7 @@ export default function AdminLogin() {
 
           <div>
             <label
+              htmlFor="admin-password"
               style={{
                 display: "block",
                 fontSize: "13px",
@@ -262,7 +269,9 @@ export default function AdminLogin() {
               Password
             </label>
             <input
+              id="admin-password"
               type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
               placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

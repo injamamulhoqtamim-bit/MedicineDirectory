@@ -47,6 +47,9 @@ export default function AdminDashboard() {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState("");
   const [existingImage, setExistingImage] = useState("");
+  const [unitPrice, setUnitPrice] = useState("");
+  const [stripPrice, setStripPrice] = useState("");
+  const [boxPrice, setBoxPrice] = useState("");
   const [uses, setUses] = useState("");
   const [dosage, setDosage] = useState("");
   const [sideEffects, setSideEffects] = useState("");
@@ -146,6 +149,9 @@ export default function AdminDashboard() {
     setImageFile(null);
     setImagePreviewUrl("");
     setExistingImage("");
+    setUnitPrice("");
+    setStripPrice("");
+    setBoxPrice("");
     setUses("");
     setDosage("");
     setSideEffects("");
@@ -163,6 +169,9 @@ export default function AdminDashboard() {
     setExistingImage(med.image || "");
     setImageFile(null);
     setImagePreviewUrl("");
+    setUnitPrice(med.unitPrice ?? "");
+    setStripPrice(med.stripPrice ?? "");
+    setBoxPrice(med.boxPrice ?? "");
     setUses(med.uses || "");
     setDosage(med.dosage || "");
     setSideEffects(med.sideEffects || "");
@@ -239,6 +248,9 @@ export default function AdminDashboard() {
         name: selectedMedicineName,
         company: selectedCompany,
         image: imageUrl,
+        unitPrice: String(unitPrice).trim(),
+        stripPrice: String(stripPrice).trim(),
+        boxPrice: String(boxPrice).trim(),
         uses,
         dosage,
         sideEffects,
@@ -435,7 +447,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* Company List with original 🏢 icon */}
+      {/* Company List */}
       <div
         style={{
           display: "flex",
@@ -1191,6 +1203,113 @@ export default function AdminDashboard() {
               />
             </div>
 
+            {/* Tiered Pricing Fields: Unit Price, Strip Price, Full Box Price */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: isMobile
+                  ? "1fr"
+                  : "repeat(3, minmax(0, 1fr))",
+                gap: "12px",
+              }}
+            >
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "13.5px",
+                    fontWeight: "700",
+                    color: "#0f172a",
+                    marginBottom: "8px",
+                  }}
+                >
+                  Unit Price (৳):
+                </label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="Jemon: 0.80 বা ৳0.80"
+                  value={unitPrice}
+                  onChange={(e) => setUnitPrice(e.target.value)}
+                  style={{
+                    width: "100%",
+                    boxSizing: "border-box",
+                    padding: "11px 13px",
+                    borderRadius: "12px",
+                    border: "1px solid #cbd5e1",
+                    background: "#f8fafc",
+                    outline: "none",
+                    fontSize: isMobile ? "14px" : "14.5px",
+                    color: "#0f172a",
+                  }}
+                />
+              </div>
+
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "13.5px",
+                    fontWeight: "700",
+                    color: "#0f172a",
+                    marginBottom: "8px",
+                  }}
+                >
+                  Strip Price (৳):
+                </label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="Jemon: 8.00 বা ৳8"
+                  value={stripPrice}
+                  onChange={(e) => setStripPrice(e.target.value)}
+                  style={{
+                    width: "100%",
+                    boxSizing: "border-box",
+                    padding: "11px 13px",
+                    borderRadius: "12px",
+                    border: "1px solid #cbd5e1",
+                    background: "#f8fafc",
+                    outline: "none",
+                    fontSize: isMobile ? "14px" : "14.5px",
+                    color: "#0f172a",
+                  }}
+                />
+              </div>
+
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: "13.5px",
+                    fontWeight: "700",
+                    color: "#0f172a",
+                    marginBottom: "8px",
+                  }}
+                >
+                  Full Box Price (৳):
+                </label>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="Jemon: 400 বা ৳400"
+                  value={boxPrice}
+                  onChange={(e) => setBoxPrice(e.target.value)}
+                  style={{
+                    width: "100%",
+                    boxSizing: "border-box",
+                    padding: "11px 13px",
+                    borderRadius: "12px",
+                    border: "1px solid #cbd5e1",
+                    background: "#f8fafc",
+                    outline: "none",
+                    fontSize: isMobile ? "14px" : "14.5px",
+                    color: "#0f172a",
+                  }}
+                />
+              </div>
+            </div>
+
             {/* Direct Image File Upload + Preview */}
             <div>
               <label
@@ -1509,6 +1628,55 @@ export default function AdminDashboard() {
                       >
                         {med.company}
                       </div>
+                      {(med.unitPrice || med.stripPrice || med.boxPrice) && (
+                        <div
+                          style={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: "6px",
+                            marginTop: "6px",
+                            fontSize: "11.5px",
+                            fontWeight: "700",
+                          }}
+                        >
+                          {med.unitPrice && (
+                            <span
+                              style={{
+                                background: "#eff6ff",
+                                color: "#1d4ed8",
+                                padding: "2px 8px",
+                                borderRadius: "999px",
+                              }}
+                            >
+                              Unit: {med.unitPrice}
+                            </span>
+                          )}
+                          {med.stripPrice && (
+                            <span
+                              style={{
+                                background: "#ecfdf5",
+                                color: "#047857",
+                                padding: "2px 8px",
+                                borderRadius: "999px",
+                              }}
+                            >
+                              Strip: {med.stripPrice}
+                            </span>
+                          )}
+                          {med.boxPrice && (
+                            <span
+                              style={{
+                                background: "#fef3c7",
+                                color: "#b45309",
+                                padding: "2px 8px",
+                                borderRadius: "999px",
+                              }}
+                            >
+                              Box: {med.boxPrice}
+                            </span>
+                          )}
+                        </div>
+                      )}
                       {med.uses && (
                         <div
                           style={{

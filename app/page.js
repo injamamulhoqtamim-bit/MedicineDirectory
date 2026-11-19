@@ -21,6 +21,14 @@ function getSafeBackgroundUrl(rawPath) {
   return encodeURI(normalized);
 }
 
+function formatPriceLabel(value) {
+  if (value === undefined || value === null || String(value).trim() === "") {
+    return "";
+  }
+  const str = String(value).trim();
+  return str.startsWith("৳") ? str : `৳${str}`;
+}
+
 function buildMergedMedicines(dbData) {
   if (!Array.isArray(dbData) || dbData.length === 0) {
     return initialMedicines;
@@ -477,6 +485,10 @@ export default function Home() {
         {filteredMedicines.length > 0 ? (
           filteredMedicines.map((med) => {
             const uniqueId = med._id || med.id;
+            const unitLabel = formatPriceLabel(med.unitPrice);
+            const stripLabel = formatPriceLabel(med.stripPrice);
+            const boxLabel = formatPriceLabel(med.boxPrice);
+
             return (
               <Link
                 key={uniqueId}
@@ -500,8 +512,13 @@ export default function Home() {
                   {med.image && (
                     <div
                       style={{
+                        position: "relative",
+                        width: "100%",
+                        height: isMobile ? "88px" : isTablet ? "120px" : "150px",
+                        overflow: "hidden",
+                        borderRadius: isMobile ? "8px" : "12px",
+                        background: "#f1f5f9",
                         marginBottom: isMobile ? "6px" : "10px",
-                        textAlign: "center",
                       }}
                     >
                       <img
@@ -513,12 +530,86 @@ export default function Home() {
                         }}
                         style={{
                           width: "100%",
-                          height: isMobile ? "66px" : isTablet ? "105px" : "135px",
+                          height: "100%",
                           objectFit: "cover",
-                          borderRadius: isMobile ? "8px" : "12px",
                           display: "block",
                         }}
                       />
+
+                      {/* Top-Left: Unit Price */}
+                      {unitLabel && (
+                        <span
+                          style={{
+                            position: "absolute",
+                            top: isMobile ? "4px" : "7px",
+                            left: isMobile ? "4px" : "7px",
+                            background: "rgba(15, 23, 42, 0.86)",
+                            color: "#ffffff",
+                            fontSize: isMobile ? "8.5px" : "10.5px",
+                            fontWeight: "700",
+                            padding: isMobile ? "2px 5px" : "3px 7px",
+                            borderRadius: "6px",
+                            backdropFilter: "blur(4px)",
+                            lineHeight: 1.2,
+                            maxWidth: "48%",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          U: {unitLabel}
+                        </span>
+                      )}
+
+                      {/* Top-Right: Strip Price */}
+                      {stripLabel && (
+                        <span
+                          style={{
+                            position: "absolute",
+                            top: isMobile ? "4px" : "7px",
+                            right: isMobile ? "4px" : "7px",
+                            background: "rgba(29, 78, 216, 0.92)",
+                            color: "#ffffff",
+                            fontSize: isMobile ? "8.5px" : "10.5px",
+                            fontWeight: "700",
+                            padding: isMobile ? "2px 5px" : "3px 7px",
+                            borderRadius: "6px",
+                            backdropFilter: "blur(4px)",
+                            lineHeight: 1.2,
+                            maxWidth: "48%",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          S: {stripLabel}
+                        </span>
+                      )}
+
+                      {/* Bottom-Right: Full Box Price */}
+                      {boxLabel && (
+                        <span
+                          style={{
+                            position: "absolute",
+                            bottom: isMobile ? "4px" : "7px",
+                            right: isMobile ? "4px" : "7px",
+                            background: "rgba(5, 150, 105, 0.94)",
+                            color: "#ffffff",
+                            fontSize: isMobile ? "8.5px" : "10.5px",
+                            fontWeight: "700",
+                            padding: isMobile ? "2px 5px" : "3px 7px",
+                            borderRadius: "6px",
+                            backdropFilter: "blur(4px)",
+                            lineHeight: 1.2,
+                            maxWidth: "70%",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          Box: {boxLabel}
+                        </span>
+                      )}
                     </div>
                   )}
                   <h3

@@ -33,12 +33,21 @@ function findLocalMedicine(id) {
   return null;
 }
 
+const formatPriceLabel = (value) => {
+  if (value === undefined || value === null || String(value).trim() === "") {
+    return "";
+  }
+  const str = String(value).trim();
+  return str.startsWith("৳") ? str : `৳${str}`;
+};
+
 export default function MedicineDetail({ params }) {
   const unwrappedParams = use(params);
   const { id } = unwrappedParams;
 
-  const [medicine, setMedicine] = useState(() => findLocalMedicine(id));
-  const [syncing, setSyncing] = useState(() => !findLocalMedicine(id));
+  // Keep initial state identical on SSR & first Client render to avoid hydration mismatch
+  const [medicine, setMedicine] = useState(null);
+  const [syncing, setSyncing] = useState(true);
   const [viewport, setViewport] = useState("desktop"); // "mobile" | "tablet" | "desktop"
 
   useEffect(() => {
@@ -204,6 +213,11 @@ export default function MedicineDetail({ params }) {
     );
   }
 
+  const unitLabel = formatPriceLabel(medicine.unitPrice);
+  const stripLabel = formatPriceLabel(medicine.stripPrice);
+  const boxLabel = formatPriceLabel(medicine.boxPrice);
+  const hasAnyPrice = Boolean(unitLabel || stripLabel || boxLabel);
+
   return (
     <main
       className="container"
@@ -288,28 +302,100 @@ export default function MedicineDetail({ params }) {
           <div
             style={{
               marginBottom: isMobile ? "16px" : "24px",
-              textAlign: "center",
               width: "100%",
             }}
           >
-            <img
-              src={medicine.image}
-              alt={medicine.name}
-              decoding="async"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
+            <div
               style={{
+                position: "relative",
                 width: "100%",
                 maxWidth: isMobile ? "100%" : isTablet ? "420px" : "480px",
-                height: isMobile ? "185px" : isTablet ? "230px" : "265px",
-                objectFit: "cover",
+                aspectRatio: "4 / 3",
+                overflow: "hidden",
                 borderRadius: isMobile ? "12px" : "16px",
                 border: "1px solid #e2e8f0",
-                display: "block",
+                background: "#f1f5f9",
                 margin: "0 auto",
               }}
-            />
+            >
+              <img
+                src={medicine.image}
+                alt={medicine.name}
+                decoding="async"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
+                }}
+              />
+
+              {/* Top-Left: Unit Price */}
+              {unitLabel && (
+                <span
+                  style={{
+                    position: "absolute",
+                    top: "8px",
+                    left: "8px",
+                    background: "rgba(15, 23, 42, 0.85)",
+                    color: "#ffffff",
+                    fontSize: "11px",
+                    fontWeight: "700",
+                    padding: "4px 8px",
+                    borderRadius: "8px",
+                    backdropFilter: "blur(4px)",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Unit: {unitLabel}
+                </span>
+              )}
+
+              {/* Top-Right: Strip Price */}
+              {stripLabel && (
+                <span
+                  style={{
+                    position: "absolute",
+                    top: "8px",
+                    right: "8px",
+                    background: "rgba(29, 78, 216, 0.9)",
+                    color: "#ffffff",
+                    fontSize: "11px",
+                    fontWeight: "700",
+                    padding: "4px 8px",
+                    borderRadius: "8px",
+                    backdropFilter: "blur(4px)",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Strip: {stripLabel}
+                </span>
+              )}
+
+              {/* Bottom-Right: Full Box Price */}
+              {boxLabel && (
+                <span
+                  style={{
+                    position: "absolute",
+                    bottom: "8px",
+                    right: "8px",
+                    background: "rgba(5, 150, 105, 0.92)",
+                    color: "#ffffff",
+                    fontSize: "11px",
+                    fontWeight: "700",
+                    padding: "4px 8px",
+                    borderRadius: "8px",
+                    backdropFilter: "blur(4px)",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Box: {boxLabel}
+                </span>
+              )}
+            </div>
           </div>
         )}
 
@@ -334,12 +420,118 @@ export default function MedicineDetail({ params }) {
             fontWeight: "700",
             fontSize: isMobile ? "14px" : "16px",
             lineHeight: "1.45",
-            marginBottom: isMobile ? "18px" : "24px",
+            marginBottom: hasAnyPrice ? "16px" : isMobile ? "18px" : "24px",
             wordBreak: "break-word",
           }}
         >
           🏢 {medicine.company}
         </p>
+
+        {hasAnyPrice && (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: isMobile
+                ? "1fr"
+                : "repeat(3, minmax(0, 1fr))",
+              gap: "10px",
+              marginBottom: isMobile ? "16px" : "20px",
+            }}
+          >
+            {unitLabel && (
+              <div
+                style={{
+                  background: "#f8fafc",
+                  border: "1px solid #cbd5e1",
+                  borderRadius: "12px",
+                  padding: "10px 12px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "11.5px",
+                    fontWeight: "700",
+                    color: "#475569",
+                  }}
+                >
+                  Unit Price
+                </div>
+                <div
+                  style={{
+                    fontSize: "15px",
+                    fontWeight: "800",
+                    color: "#0f172a",
+                    marginTop: "2px",
+                  }}
+                >
+                  {unitLabel}
+                </div>
+              </div>
+            )}
+
+            {stripLabel && (
+              <div
+                style={{
+                  background: "#eff6ff",
+                  border: "1px solid #bfdbfe",
+                  borderRadius: "12px",
+                  padding: "10px 12px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "11.5px",
+                    fontWeight: "700",
+                    color: "#1d4ed8",
+                  }}
+                >
+                  Strip Price
+                </div>
+                <div
+                  style={{
+                    fontSize: "15px",
+                    fontWeight: "800",
+                    color: "#1e3a8a",
+                    marginTop: "2px",
+                  }}
+                >
+                  {stripLabel}
+                </div>
+              </div>
+            )}
+
+            {boxLabel && (
+              <div
+                style={{
+                  background: "#ecfdf5",
+                  border: "1px solid #a7f3d0",
+                  borderRadius: "12px",
+                  padding: "10px 12px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "11.5px",
+                    fontWeight: "700",
+                    color: "#047857",
+                  }}
+                >
+                  Full Box Price
+                </div>
+                <div
+                  style={{
+                    fontSize: "15px",
+                    fontWeight: "800",
+                    color: "#065f46",
+                    marginTop: "2px",
+                  }}
+                >
+                  {boxLabel}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <div
           className="info-card uses"
