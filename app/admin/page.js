@@ -21,21 +21,34 @@ export default function AdminLogin() {
     return () => window.removeEventListener("resize", checkViewport);
   }, []);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setSubmitting(true);
 
-    setTimeout(() => {
-      // Simple admin check (Apni nijer moto email/password change korte paren)
-      if (email.trim() === "admin@gmail.com" && password === "admin123") {
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
         localStorage.setItem("isAdminLoggedIn", "true");
         router.push("/admin/dashboard");
       } else {
-        setError("Email ba password vul hoyeche!");
+        setError(data.error || "Email ba password vul hoyeche!");
         setSubmitting(false);
       }
-    }, 250);
+    } catch (err) {
+      setError("Server-e connect kora jayni!");
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -182,7 +195,7 @@ export default function AdminLogin() {
             </label>
             <input
               type="email"
-              placeholder="admin@gmail.com"
+              placeholder="Enter admin email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="search-input"
@@ -211,7 +224,7 @@ export default function AdminLogin() {
             </label>
             <input
               type={showPassword ? "text" : "password"}
-              placeholder="******"
+              placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="search-input"
