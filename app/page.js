@@ -3,6 +3,9 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { initialMedicines, CompanyList } from "./data/medicines";
 
+// এখানে আপনার নিজের ছবির পাথ বা URL দিন (যেমন: "/images/pharma-banner.jpg")
+const HERO_BACKGROUND_IMAGE = "/Smile.png";
+
 function buildMergedMedicines(dbData) {
   if (!Array.isArray(dbData) || dbData.length === 0) {
     return initialMedicines;
@@ -211,6 +214,8 @@ export default function Home() {
     }
   };
 
+  const hasHeroImage = Boolean(HERO_BACKGROUND_IMAGE && HERO_BACKGROUND_IMAGE.trim());
+
   return (
     <main
       className="container"
@@ -245,25 +250,51 @@ export default function Home() {
         </div>
       )}
 
-      {/* Premium Header Card with Sheikh Drugs Pharma Logo */}
+      {/* Hero Header Card with Custom Background Image */}
       <div
         className="header-card"
         style={{
-          padding: isMobile ? "20px 16px" : "28px 28px",
+          position: "relative",
+          overflow: "hidden",
+          padding: isMobile ? "24px 16px" : isTablet ? "32px 28px" : "38px 34px",
+          minHeight: isMobile ? "136px" : "164px",
+          display: "flex",
+          alignItems: "center",
           borderRadius: isMobile ? "16px" : "22px",
           boxSizing: "border-box",
-          background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+          backgroundColor: "#0f172a",
+          backgroundImage: hasHeroImage
+            ? `url("${HERO_BACKGROUND_IMAGE.trim()}")`
+            : "linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 55%, #0284c7 100%)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
           border: "1px solid #e2e8f0",
-          boxShadow: "0 10px 25px -10px rgba(15, 23, 42, 0.06)",
+          boxShadow: "0 12px 28px -10px rgba(15, 23, 42, 0.16)",
         }}
       >
+        {/* Overlay for readable text over any background image */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: hasHeroImage
+              ? "linear-gradient(135deg, rgba(15, 23, 42, 0.72) 0%, rgba(15, 23, 42, 0.48) 100%)"
+              : "linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(15, 23, 42, 0.18) 100%)",
+            pointerEvents: "none",
+          }}
+        />
+
         <div
           className="header-content"
           style={{
+            position: "relative",
+            zIndex: 1,
             display: "flex",
             alignItems: isMobile ? "flex-start" : "center",
             flexDirection: isMobile ? "column" : "row",
             gap: isMobile ? "12px" : "16px",
+            width: "100%",
           }}
         >
           <span
@@ -277,7 +308,8 @@ export default function Home() {
               alignItems: "center",
               justifyContent: "center",
               boxShadow:
-                "0 8px 18px -4px rgba(37, 99, 235, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.35)",
+                "0 8px 18px -4px rgba(37, 99, 235, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.35)",
+              border: "1px solid rgba(255, 255, 255, 0.25)",
               flexShrink: 0,
             }}
           >
@@ -306,7 +338,8 @@ export default function Home() {
                 fontWeight: "800",
                 lineHeight: "1.25",
                 margin: "0 0 6px 0",
-                color: "#0f172a",
+                color: "#ffffff",
+                textShadow: "0 2px 10px rgba(0, 0, 0, 0.35)",
               }}
             >
               Sheikh Drugs Pharma
@@ -317,7 +350,8 @@ export default function Home() {
                 fontSize: isMobile ? "13.5px" : "15px",
                 lineHeight: "1.5",
                 margin: 0,
-                color: "#475569",
+                color: "rgba(255, 255, 255, 0.92)",
+                textShadow: "0 1px 6px rgba(0, 0, 0, 0.3)",
               }}
             >
               আপনার প্রয়োজনীয় ঔষধ এবং স্বনামধন্য কোম্পানির তালিকা এক জায়গায়
