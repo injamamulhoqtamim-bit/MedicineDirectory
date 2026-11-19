@@ -237,9 +237,9 @@ export default function Home() {
       className="container"
       style={{
         width: "100%",
-        maxWidth: "1140px",
+        maxWidth: "1360px",
         margin: "0 auto",
-        padding: isMobile ? "14px" : isTablet ? "22px 20px" : "28px 24px",
+        padding: isMobile ? "10px" : isTablet ? "18px 16px" : "24px 20px",
         boxSizing: "border-box",
       }}
     >
@@ -272,8 +272,8 @@ export default function Home() {
         style={{
           position: "relative",
           overflow: "hidden",
-          padding: isMobile ? "24px 16px" : isTablet ? "32px 28px" : "40px 34px",
-          minHeight: isMobile ? "168px" : "198px",
+          padding: isMobile ? "22px 14px" : isTablet ? "30px 24px" : "38px 34px",
+          minHeight: isMobile ? "158px" : "196px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -335,7 +335,7 @@ export default function Home() {
           <h1
             className="header-title"
             style={{
-              fontSize: isMobile ? "19px" : isTablet ? "24px" : "28px",
+              fontSize: isMobile ? "18.5px" : isTablet ? "24px" : "28px",
               fontWeight: "800",
               lineHeight: "1.3",
               margin: 0,
@@ -348,7 +348,7 @@ export default function Home() {
           </h1>
           <h2
             style={{
-              fontSize: isMobile ? "16px" : isTablet ? "20px" : "22px",
+              fontSize: isMobile ? "15.5px" : isTablet ? "20px" : "22px",
               fontWeight: "700",
               lineHeight: "1.35",
               margin: 0,
@@ -362,7 +362,7 @@ export default function Home() {
           <p
             className="header-subtitle"
             style={{
-              fontSize: isMobile ? "13px" : "15px",
+              fontSize: isMobile ? "12.5px" : "15px",
               lineHeight: "1.5",
               margin: "2px 0 0 0",
               color: "rgba(255, 255, 255, 0.94)",
@@ -378,10 +378,10 @@ export default function Home() {
       <div
         className="filter-section"
         style={{
-          padding: isMobile ? "14px" : "20px",
+          padding: isMobile ? "12px" : "20px",
           borderRadius: isMobile ? "16px" : "20px",
           boxSizing: "border-box",
-          marginTop: isMobile ? "16px" : "20px",
+          marginTop: isMobile ? "14px" : "20px",
           background: "#ffffff",
           border: "1px solid #e2e8f0",
           boxShadow: "0 8px 20px -10px rgba(15, 23, 42, 0.05)",
@@ -390,7 +390,7 @@ export default function Home() {
         <h3
           className="filter-title"
           style={{
-            fontSize: isMobile ? "14px" : "16px",
+            fontSize: isMobile ? "13.5px" : "16px",
             lineHeight: "1.45",
             marginTop: 0,
             marginBottom: "12px",
@@ -405,7 +405,7 @@ export default function Home() {
           style={{
             display: "flex",
             flexWrap: "wrap",
-            gap: isMobile ? "8px" : "10px",
+            gap: isMobile ? "6px" : "10px",
           }}
         >
           <button
@@ -418,8 +418,8 @@ export default function Home() {
               selectedCompany === "" && !searchLower ? "active" : ""
             }`}
             style={{
-              fontSize: isMobile ? "12.5px" : "13.5px",
-              padding: isMobile ? "7px 12px" : "8px 14px",
+              fontSize: isMobile ? "11.5px" : "13.5px",
+              padding: isMobile ? "6px 10px" : "8px 14px",
             }}
           >
             🌟 সব কোম্পানি
@@ -440,8 +440,8 @@ export default function Home() {
                 }}
                 className={`filter-btn ${isSelected ? "active" : ""}`}
                 style={{
-                  fontSize: isMobile ? "12.5px" : "13.5px",
-                  padding: isMobile ? "7px 12px" : "8px 14px",
+                  fontSize: isMobile ? "11.5px" : "13.5px",
+                  padding: isMobile ? "6px 10px" : "8px 14px",
                   ...(isSearchMatched
                     ? {
                         backgroundColor: "#dc2626",
@@ -462,13 +462,14 @@ export default function Home() {
         </div>
       </div>
 
+      {/* 4 Cards Per Row across Mobile, Tablet, and Desktop */}
       <div
         className="grid-container"
         style={{
           display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))",
-          gap: isMobile ? "14px" : "20px",
-          marginTop: isMobile ? "16px" : "22px",
+          gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+          gap: isMobile ? "8px" : isTablet ? "12px" : "18px",
+          marginTop: isMobile ? "14px" : "22px",
           width: "100%",
           boxSizing: "border-box",
         }}
@@ -486,8 +487,8 @@ export default function Home() {
                 onClick={() => primeMedicineInCache(med)}
                 className="card"
                 style={{
-                  padding: isMobile ? "16px" : "20px",
-                  borderRadius: isMobile ? "16px" : "20px",
+                  padding: isMobile ? "8px" : isTablet ? "12px" : "16px",
+                  borderRadius: isMobile ? "11px" : "18px",
                   boxSizing: "border-box",
                   minWidth: 0,
                   display: "flex",
@@ -495,9 +496,14 @@ export default function Home() {
                   justifyContent: "space-between",
                 }}
               >
-                <div>
+                <div style={{ minWidth: 0 }}>
                   {med.image && (
-                    <div style={{ marginBottom: "12px", textAlign: "center" }}>
+                    <div
+                      style={{
+                        marginBottom: isMobile ? "6px" : "10px",
+                        textAlign: "center",
+                      }}
+                    >
                       <img
                         src={med.image}
                         alt={med.name}
@@ -507,9 +513,9 @@ export default function Home() {
                         }}
                         style={{
                           width: "100%",
-                          height: isMobile ? "135px" : "150px",
+                          height: isMobile ? "66px" : isTablet ? "105px" : "135px",
                           objectFit: "cover",
-                          borderRadius: "12px",
+                          borderRadius: isMobile ? "8px" : "12px",
                           display: "block",
                         }}
                       />
@@ -517,12 +523,13 @@ export default function Home() {
                   )}
                   <h3
                     style={{
-                      margin: "0 0 6px 0",
-                      fontSize: isMobile ? "16px" : "18px",
+                      margin: "0 0 4px 0",
+                      fontSize: isMobile ? "11px" : isTablet ? "13.5px" : "16px",
                       fontWeight: "700",
                       color: "#0f172a",
-                      lineHeight: "1.35",
+                      lineHeight: "1.3",
                       wordBreak: "break-word",
+                      overflowWrap: "anywhere",
                     }}
                   >
                     {med.name}
@@ -530,10 +537,11 @@ export default function Home() {
                   <p
                     style={{
                       margin: 0,
-                      fontSize: isMobile ? "13px" : "14px",
-                      lineHeight: "1.45",
+                      fontSize: isMobile ? "9.5px" : isTablet ? "11.5px" : "13px",
+                      lineHeight: "1.35",
                       color: "#475569",
                       wordBreak: "break-word",
+                      overflowWrap: "anywhere",
                     }}
                   >
                     🏢 {med.company}
@@ -543,23 +551,26 @@ export default function Home() {
                 <div
                   style={{
                     display: "flex",
-                    flexDirection: isMobile ? "column" : "row",
-                    flexWrap: "wrap",
-                    justifyContent: "space-between",
-                    alignItems: isMobile ? "stretch" : "center",
-                    gap: "10px",
-                    marginTop: "16px",
+                    flexDirection: "column",
+                    alignItems: "stretch",
+                    gap: isMobile ? "5px" : "8px",
+                    marginTop: isMobile ? "8px" : "14px",
+                    minWidth: 0,
                   }}
                 >
                   <span
                     className="details-btn"
                     style={{
                       margin: 0,
-                      fontSize: isMobile ? "13px" : "14px",
+                      fontSize: isMobile ? "9.5px" : isTablet ? "11.5px" : "13px",
+                      lineHeight: 1.25,
                       display: "inline-flex",
                       alignItems: "center",
-                      justifyContent: isMobile ? "center" : "flex-start",
-                      gap: "4px",
+                      justifyContent: "center",
+                      gap: "3px",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
                     }}
                   >
                     ডিটেইলস দেখুন <span>→</span>
@@ -574,35 +585,37 @@ export default function Home() {
                         "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
                       color: "#1d4ed8",
                       border: "1px solid #93c5fd",
-                      padding: isMobile ? "8px 12px" : "8px 14px",
-                      borderRadius: "11px",
-                      fontSize: isMobile ? "12.5px" : "13px",
+                      padding: isMobile ? "5px 4px" : isTablet ? "6px 8px" : "8px 10px",
+                      borderRadius: isMobile ? "8px" : "11px",
+                      fontSize: isMobile ? "9px" : isTablet ? "11px" : "12px",
                       fontWeight: "700",
                       cursor: "pointer",
                       whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
                       display: "inline-flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      gap: "6px",
+                      gap: isMobile ? "3px" : "5px",
                       boxShadow:
                         "0 4px 12px -3px rgba(37, 99, 235, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
                       transition: "all 0.18s ease",
-                      width: isMobile ? "100%" : "auto",
+                      width: "100%",
                       boxSizing: "border-box",
                     }}
                   >
                     <span
                       style={{
-                        width: "18px",
-                        height: "18px",
-                        borderRadius: "6px",
+                        width: isMobile ? "13px" : "16px",
+                        height: isMobile ? "13px" : "16px",
+                        borderRadius: "4px",
                         background:
                           "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
                         color: "#ffffff",
                         display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        fontSize: "13px",
+                        fontSize: isMobile ? "10px" : "12px",
                         fontWeight: "800",
                         lineHeight: 1,
                         flexShrink: 0,
@@ -610,7 +623,9 @@ export default function Home() {
                     >
                       +
                     </span>
-                    <span>নাই? সিলেক্ট করুন</span>
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+                      নাই? সিলেক্ট করুন
+                    </span>
                   </button>
                 </div>
               </Link>
@@ -620,7 +635,7 @@ export default function Home() {
           <div
             style={{
               textAlign: "center",
-              gridColumn: isMobile ? "span 1" : "span 2",
+              gridColumn: "span 4",
               padding: isMobile ? "34px 18px" : "50px",
               background: "white",
               borderRadius: isMobile ? "16px" : "20px",
