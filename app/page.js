@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { initialMedicines, CompanyList } from "./data/medicines";
 
@@ -60,6 +60,7 @@ function buildMergedMedicines(dbData) {
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [navbarSearch, setNavbarSearch] = useState("");
   const [selectedCompany, setSelectedCompany] = useState("");
   const [medicinesData, setMedicinesData] = useState(initialMedicines);
   const [message, setMessage] = useState("");
@@ -91,6 +92,7 @@ export default function Home() {
 
     if (initialSearch) {
       setSearchTerm(initialSearch);
+      setNavbarSearch(initialSearch);
       setSelectedCompany("");
       sessionStorage.setItem("medicineSearchTerm", initialSearch);
       window.dispatchEvent(
@@ -99,8 +101,9 @@ export default function Home() {
     }
 
     const handleNavbarSearch = (e) => {
-      const val = String(e?.detail || "");
+      const val = e?.detail !== undefined ? String(e.detail) : "";
       setSearchTerm(val);
+      setNavbarSearch(val);
       if (val.trim()) {
         setSelectedCompany("");
       }
@@ -114,6 +117,7 @@ export default function Home() {
 
   const syncSearchToNavbar = (val) => {
     setSearchTerm(val);
+    setNavbarSearch(val);
     sessionStorage.setItem("medicineSearchTerm", val);
     window.dispatchEvent(
       new CustomEvent("navbarSearchSync", { detail: val })
@@ -198,27 +202,31 @@ export default function Home() {
 
   const isMobile = viewport === "mobile";
   const isTablet = viewport === "tablet";
-  const searchLower = String(searchTerm || "").toLowerCase().trim();
+  const effectiveSearch = String(navbarSearch || searchTerm || "").trim();
+  const searchLower = effectiveSearch.toLowerCase();
 
-  const filteredMedicines = medicinesData.filter((med) => {
-    const medName = String(med.name || "").toLowerCase();
-    const medCompany = String(med.company || "").toLowerCase();
-    const medUses = String(med.uses || "").toLowerCase();
+  const visibleMedicines = useMemo(() => {
+    const q = navbarSearch.trim().toLowerCase();
+    if (!q) return medicinesData;
+    return medicinesData.filter((med) => {
+      const nameMatch = String(med.name || "").toLowerCase().includes(q);
+      const companyMatch = String(med.company || "").toLowerCase().includes(q);
+      const usesMatch = String(med.uses || "").toLowerCase().includes(q);
+      return nameMatch || companyMatch || usesMatch;
+    });
+  }, [medicinesData, navbarSearch]);
 
-    if (searchLower) {
-      return (
-        medName.includes(searchLower) ||
-        medCompany.includes(searchLower) ||
-        medUses.includes(searchLower)
-      );
-    }
-
-    if (selectedCompany) {
-      return med.company === selectedCompany;
-    }
-
-    return true;
-  });
+  const filteredMedicines = useMemo(() => {
+    return visibleMedicines.filter((med) => {
+      if (searchLower) {
+        return true;
+      }
+      if (selectedCompany) {
+        return med.company === selectedCompany;
+      }
+      return true;
+    });
+  }, [visibleMedicines, searchLower, selectedCompany]);
 
   const handleAddToNotification = (e, med) => {
     e.preventDefault();
@@ -472,6 +480,7 @@ export default function Home() {
 
       {/* 4 Cards Per Row across Mobile, Tablet, and Desktop */}
       <div
+        id="medicine-results-section"
         className="grid-container"
         style={{
           display: "grid",
