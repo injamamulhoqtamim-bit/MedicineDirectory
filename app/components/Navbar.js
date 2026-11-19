@@ -6,6 +6,7 @@ export default function Navbar() {
   const [missingList, setMissingList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [hoveredBtn, setHoveredBtn] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
   const [viewport, setViewport] = useState("desktop"); // "mobile" | "tablet" | "desktop"
   const router = useRouter();
   const pathname = usePathname();
@@ -91,6 +92,102 @@ export default function Navbar() {
   const isMobile = viewport === "mobile";
   const isTablet = viewport === "tablet";
 
+  const renderBrandLogo = () => (
+    <button
+      type="button"
+      onClick={() => {
+        handleClearSearch();
+        router.push("/");
+      }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: isMobile ? "9px" : "11px",
+        background: "transparent",
+        border: "none",
+        padding: "2px 0",
+        cursor: "pointer",
+        minWidth: 0,
+        flexShrink: 0,
+        textAlign: "left",
+      }}
+    >
+      {/* Premium Pharma Emblem Logo */}
+      <span
+        style={{
+          width: isMobile ? "36px" : "42px",
+          height: isMobile ? "36px" : "42px",
+          borderRadius: isMobile ? "11px" : "13px",
+          background:
+            "linear-gradient(135deg, #1d4ed8 0%, #2563eb 55%, #0ea5e9 100%)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow:
+            "0 8px 18px -4px rgba(37, 99, 235, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.35)",
+          border: "1px solid rgba(255, 255, 255, 0.25)",
+          flexShrink: 0,
+        }}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={isMobile ? "20" : "23"}
+          height={isMobile ? "20" : "23"}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#ffffff"
+          strokeWidth="2.1"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
+          <path d="m8.5 8.5 7 7" />
+          <circle cx="18" cy="6" r="1" fill="#ffffff" stroke="none" />
+        </svg>
+      </span>
+
+      <span
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          lineHeight: 1.15,
+          minWidth: 0,
+        }}
+      >
+        <span
+          style={{
+            margin: 0,
+            background:
+              "linear-gradient(135deg, #0f172a 0%, #1d4ed8 65%, #2563eb 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            fontSize: isMobile ? "15.5px" : isTablet ? "17.5px" : "19.5px",
+            fontWeight: "800",
+            letterSpacing: "-0.025em",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Sheikh Drugs Pharma
+        </span>
+        {!isMobile && (
+          <span
+            style={{
+              fontSize: "10.5px",
+              fontWeight: "700",
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              color: "#64748b",
+              marginTop: "2px",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Medicine Directory
+          </span>
+        )}
+      </span>
+    </button>
+  );
+
   return (
     <nav
       style={{
@@ -99,18 +196,18 @@ export default function Navbar() {
         justifyContent: "space-between",
         alignItems: isMobile ? "stretch" : "center",
         gap: isMobile ? "10px" : isTablet ? "12px" : "16px",
-        padding: isMobile ? "10px 12px" : isTablet ? "12px 18px" : "14px 24px",
+        padding: isMobile ? "10px 12px" : isTablet ? "12px 18px" : "13px 24px",
         background:
-          "linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.96) 100%)",
-        backdropFilter: "blur(14px)",
-        WebkitBackdropFilter: "blur(14px)",
+          "linear-gradient(135deg, rgba(255, 255, 255, 0.97) 0%, rgba(248, 250, 252, 0.97) 100%)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
         boxShadow:
-          "0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 4px 10px -6px rgba(15, 23, 42, 0.05)",
-        borderRadius: isMobile ? "14px" : "18px",
+          "0 12px 28px -6px rgba(15, 23, 42, 0.09), 0 4px 12px -4px rgba(15, 23, 42, 0.04)",
+        borderRadius: isMobile ? "15px" : "20px",
         marginTop: isMobile ? "8px" : "14px",
         marginBottom: isMobile ? "12px" : "20px",
         position: "sticky",
-        top: isMobile ? "8px" : "16px",
+        top: isMobile ? "8px" : "14px",
         zIndex: 1000,
         border: "1px solid rgba(226, 232, 240, 0.95)",
         boxSizing: "border-box",
@@ -129,55 +226,7 @@ export default function Navbar() {
           minWidth: 0,
         }}
       >
-        <button
-          type="button"
-          onClick={() => {
-            handleClearSearch();
-            router.push("/");
-          }}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: isMobile ? "8px" : "10px",
-            background: "transparent",
-            border: "none",
-            padding: 0,
-            cursor: "pointer",
-            minWidth: 0,
-            flexShrink: 0,
-          }}
-        >
-          <span
-            style={{
-              width: isMobile ? "32px" : "38px",
-              height: isMobile ? "32px" : "38px",
-              borderRadius: "11px",
-              background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: isMobile ? "16px" : "19px",
-              boxShadow: "0 6px 14px -3px rgba(37, 99, 235, 0.4)",
-              flexShrink: 0,
-            }}
-          >
-            💊
-          </span>
-          <span
-            style={{
-              margin: 0,
-              background: "linear-gradient(135deg, #1e40af 0%, #2563eb 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              fontSize: isMobile ? "16px" : isTablet ? "17.5px" : "19px",
-              fontWeight: "800",
-              letterSpacing: "-0.02em",
-              whiteSpace: "nowrap",
-            }}
-          >
-            Sheikh Drugs Pharma
-          </span>
-        </button>
+        {renderBrandLogo()}
 
         {isMobile && (
           <div style={{ position: "relative", flexShrink: 0 }}>
@@ -187,13 +236,14 @@ export default function Navbar() {
               style={{
                 background: "#f8fafc",
                 border: "1px solid #e2e8f0",
-                padding: "8px",
+                padding: "8px 9px",
                 borderRadius: "11px",
                 cursor: "pointer",
                 position: "relative",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                boxShadow: "0 2px 6px rgba(15, 23, 42, 0.04)",
               }}
               title="Requested Medicines"
               aria-label="Requested Medicines"
@@ -204,7 +254,7 @@ export default function Navbar() {
                 height="18"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#475569"
+                stroke="#334155"
                 strokeWidth="2.1"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -249,27 +299,44 @@ export default function Navbar() {
           display: "flex",
           alignItems: "center",
           flex: isMobile ? "initial" : 1,
-          maxWidth: isMobile ? "100%" : isTablet ? "340px" : "460px",
+          maxWidth: isMobile ? "100%" : isTablet ? "330px" : "450px",
           width: "100%",
           minWidth: 0,
-          background: "#f8fafc",
-          border: "1px solid #cbd5e1",
-          borderRadius: "12px",
+          background: searchFocused ? "#ffffff" : "#f8fafc",
+          border: searchFocused ? "1px solid #3b82f6" : "1px solid #cbd5e1",
+          boxShadow: searchFocused
+            ? "0 0 0 3px rgba(59, 130, 246, 0.14)"
+            : "none",
+          borderRadius: "13px",
           padding: isMobile ? "3px 5px 3px 10px" : "4px 6px 4px 12px",
           boxSizing: "border-box",
-          gap: "5px",
+          gap: "6px",
+          transition: "all 0.2s ease",
         }}
       >
-        <span style={{ fontSize: isMobile ? "13px" : "14px", flexShrink: 0 }}>
-          🔍
-        </span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={searchFocused ? "#2563eb" : "#64748b"}
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ flexShrink: 0 }}
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
+
         <input
           type="text"
           value={searchQuery}
           onChange={handleSearchChange}
-          placeholder={
-            isMobile ? "ঔষধ বা কোম্পানি সার্চ..." : "ঔষধ বা কোম্পানির নাম সার্চ..."
-          }
+          onFocus={() => setSearchFocused(true)}
+          onBlur={() => setSearchFocused(false)}
+          placeholder="ঔষধ বা কোম্পানির নাম সার্চ..."
           aria-label="Search medicine or company"
           style={{
             flex: 1,
@@ -282,6 +349,7 @@ export default function Navbar() {
             padding: isMobile ? "5px 2px" : "6px 2px",
           }}
         />
+
         {searchQuery && (
           <button
             type="button"
@@ -306,19 +374,21 @@ export default function Navbar() {
             ✕
           </button>
         )}
+
         <button
           type="submit"
           style={{
             background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
             color: "#ffffff",
             border: "none",
-            borderRadius: "9px",
-            padding: isMobile ? "6px 10px" : "7px 14px",
+            borderRadius: "10px",
+            padding: isMobile ? "6px 11px" : "7px 15px",
             fontSize: isMobile ? "12px" : "12.5px",
             fontWeight: "600",
             cursor: "pointer",
             whiteSpace: "nowrap",
             flexShrink: 0,
+            boxShadow: "0 4px 10px -2px rgba(37, 99, 235, 0.35)",
           }}
         >
           Search
@@ -338,7 +408,7 @@ export default function Navbar() {
                 ? "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)"
                 : "#f8fafc",
               border: hoveredBtn ? "1px solid #93c5fd" : "1px solid #e2e8f0",
-              padding: isTablet ? "9px 10px" : "10px 12px",
+              padding: isTablet ? "9px 11px" : "10px 14px",
               borderRadius: "14px",
               cursor: "pointer",
               position: "relative",
@@ -348,16 +418,16 @@ export default function Navbar() {
               justifyContent: "center",
               transition: "all 0.2s ease",
               boxShadow: hoveredBtn
-                ? "0 6px 14px -4px rgba(37, 99, 235, 0.25)"
-                : "0 1px 2px rgba(15, 23, 42, 0.04)",
+                ? "0 8px 16px -4px rgba(37, 99, 235, 0.25)"
+                : "0 2px 5px rgba(15, 23, 42, 0.04)",
             }}
             title="Requested Medicines"
             aria-label="Requested Medicines"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
+              width="19"
+              height="19"
               viewBox="0 0 24 24"
               fill="none"
               stroke={hoveredBtn ? "#2563eb" : "#475569"}

@@ -3,6 +3,41 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { CompanyList } from "../../data/medicines";
 
+const renderPharmaEmblem = (size = 36) => (
+  <span
+    style={{
+      width: `${size}px`,
+      height: `${size}px`,
+      borderRadius: "11px",
+      background:
+        "linear-gradient(135deg, #1d4ed8 0%, #2563eb 55%, #0ea5e9 100%)",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      boxShadow:
+        "0 8px 18px -4px rgba(37, 99, 235, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.35)",
+      border: "1px solid rgba(255, 255, 255, 0.25)",
+      flexShrink: 0,
+    }}
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={Math.round(size * 0.56)}
+      height={Math.round(size * 0.56)}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#ffffff"
+      strokeWidth="2.1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
+      <path d="m8.5 8.5 7 7" />
+      <circle cx="18" cy="6" r="1" fill="#ffffff" stroke="none" />
+    </svg>
+  </span>
+);
+
 export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCompany, setSelectedCompany] = useState(CompanyList[0] || "");
@@ -24,7 +59,7 @@ export default function AdminDashboard() {
   const [loadingList, setLoadingList] = useState(true);
 
   // Responsive & UI states
-  const [isMobile, setIsMobile] = useState(false);
+  const [viewport, setViewport] = useState("desktop"); // "mobile" | "tablet" | "desktop"
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Premium Delete Pop-up & Toast states
@@ -36,16 +71,21 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const checkViewport = () => {
-      const mobile = window.innerWidth < 860;
-      setIsMobile(mobile);
-      if (!mobile) {
+      const width = window.innerWidth;
+      if (width < 860) {
+        setViewport("mobile");
+      } else {
         setMobileSidebarOpen(false);
+        setViewport(width < 1100 ? "tablet" : "desktop");
       }
     };
     checkViewport();
     window.addEventListener("resize", checkViewport);
     return () => window.removeEventListener("resize", checkViewport);
   }, []);
+
+  const isMobile = viewport === "mobile";
+  const isTablet = viewport === "tablet";
 
   useEffect(() => {
     if (!imageFile) {
@@ -254,50 +294,76 @@ export default function AdminDashboard() {
           alignItems: "center",
           marginBottom: "16px",
           gap: "8px",
+          paddingBottom: "14px",
+          borderBottom: "1px solid #e2e8f0",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span
-            style={{
-              width: "32px",
-              height: "32px",
-              borderRadius: "10px",
-              background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
-              color: "white",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "15px",
-              boxShadow: "0 6px 12px -4px rgba(37, 99, 235, 0.45)",
-            }}
-          >
-            🛠️
-          </span>
-          <h2
-            style={{
-              margin: 0,
-              color: "#0f172a",
-              fontSize: "17px",
-              fontWeight: "800",
-            }}
-          >
-            Admin Panel
-          </h2>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            minWidth: 0,
+          }}
+        >
+          {renderPharmaEmblem(36)}
+          <div style={{ minWidth: 0 }}>
+            <h2
+              style={{
+                margin: 0,
+                background:
+                  "linear-gradient(135deg, #0f172a 0%, #1d4ed8 70%, #2563eb 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                fontSize: "14.5px",
+                fontWeight: "800",
+                lineHeight: 1.2,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              Sheikh Drugs Pharma
+            </h2>
+            <span
+              style={{
+                display: "block",
+                fontSize: "10.5px",
+                fontWeight: "700",
+                letterSpacing: "0.05em",
+                textTransform: "uppercase",
+                color: "#64748b",
+                marginTop: "2px",
+              }}
+            >
+              Admin Dashboard
+            </span>
+          </div>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            flexShrink: 0,
+          }}
+        >
           <button
             type="button"
             onClick={handleLogout}
             style={{
-              background: "#fef2f2",
+              background: "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)",
               color: "#dc2626",
-              border: "1px solid #fecaca",
-              padding: "6px 10px",
-              borderRadius: "9px",
+              border: "1px solid #fca5a5",
+              padding: "9px 16px",
+              borderRadius: "12px",
               cursor: "pointer",
-              fontSize: "12px",
+              fontSize: "13.5px",
               fontWeight: "700",
+              boxShadow: "0 6px 14px -4px rgba(220, 38, 38, 0.25)",
+              transition: "all 0.18s ease",
+              whiteSpace: "nowrap",
             }}
           >
             Logout
@@ -310,9 +376,9 @@ export default function AdminDashboard() {
               style={{
                 background: "#f1f5f9",
                 color: "#334155",
-                border: "none",
-                padding: "6px 10px",
-                borderRadius: "9px",
+                border: "1px solid #cbd5e1",
+                padding: "8px 11px",
+                borderRadius: "11px",
                 cursor: "pointer",
                 fontSize: "13px",
                 fontWeight: "700",
@@ -335,7 +401,7 @@ export default function AdminDashboard() {
             width: "100%",
             boxSizing: "border-box",
             padding: "10px 34px 10px 12px",
-            borderRadius: "11px",
+            borderRadius: "12px",
             border: "1px solid #cbd5e1",
             background: "#f8fafc",
             outline: "none",
@@ -369,7 +435,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* Company List */}
+      {/* Company List with original 🏢 icon */}
       <div
         style={{
           display: "flex",
@@ -419,7 +485,9 @@ export default function AdminDashboard() {
                 padding: "9px 11px",
                 borderRadius: "10px",
                 border: isActive ? "1px solid #bfdbfe" : "1px solid transparent",
-                background: isActive ? "#eff6ff" : "transparent",
+                background: isActive
+                  ? "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)"
+                  : "transparent",
                 color: isActive ? "#1d4ed8" : "#334155",
                 fontWeight: isActive ? "700" : "500",
                 cursor: "pointer",
@@ -459,10 +527,11 @@ export default function AdminDashboard() {
         display: "flex",
         flexDirection: isMobile ? "column" : "row",
         minHeight: "100vh",
-        background:
-          "linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)",
+        background: "linear-gradient(180deg, #f8fafc 0%, #eef2f6 100%)",
         width: "100%",
+        maxWidth: "100%",
         overflowX: "hidden",
+        boxSizing: "border-box",
       }}
     >
       {/* Premium Toast Pop-up Notification */}
@@ -492,6 +561,7 @@ export default function AdminDashboard() {
                 : "1px solid rgba(248, 113, 113, 0.45)",
             minWidth: isMobile ? "auto" : "290px",
             maxWidth: isMobile ? "100%" : "420px",
+            boxSizing: "border-box",
           }}
         >
           <div
@@ -693,11 +763,12 @@ export default function AdminDashboard() {
             background: "rgba(255, 255, 255, 0.96)",
             backdropFilter: "blur(10px)",
             borderBottom: "1px solid #e2e8f0",
-            padding: "12px 16px",
+            padding: "10px 14px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: "10px",
+            gap: "8px",
+            boxSizing: "border-box",
           }}
         >
           <button
@@ -707,10 +778,10 @@ export default function AdminDashboard() {
               background: "#eff6ff",
               color: "#2563eb",
               border: "1px solid #bfdbfe",
-              padding: "8px 12px",
+              padding: "8px 11px",
               borderRadius: "10px",
               cursor: "pointer",
-              fontSize: "13px",
+              fontSize: "12.5px",
               fontWeight: "700",
               flexShrink: 0,
             }}
@@ -720,31 +791,42 @@ export default function AdminDashboard() {
 
           <div
             style={{
-              fontSize: "13px",
-              fontWeight: "700",
-              color: "#0f172a",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              minWidth: 0,
               flex: 1,
-              textAlign: "center",
+              justifyContent: "center",
             }}
           >
-            {selectedCompany}
+            {renderPharmaEmblem(28)}
+            <div
+              style={{
+                fontSize: "13px",
+                fontWeight: "800",
+                color: "#0f172a",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              🏢 {selectedCompany}
+            </div>
           </div>
 
           <button
             type="button"
             onClick={handleLogout}
             style={{
-              background: "#fef2f2",
+              background: "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)",
               color: "#dc2626",
-              border: "1px solid #fecaca",
-              padding: "8px 10px",
-              borderRadius: "10px",
+              border: "1px solid #fca5a5",
+              padding: "9px 15px",
+              borderRadius: "12px",
               cursor: "pointer",
-              fontSize: "12px",
+              fontSize: "13px",
               fontWeight: "700",
+              boxShadow: "0 6px 14px -4px rgba(220, 38, 38, 0.22)",
               flexShrink: 0,
             }}
           >
@@ -769,7 +851,7 @@ export default function AdminDashboard() {
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              width: "84%",
+              width: "85%",
               maxWidth: "320px",
               height: "100%",
               background: "white",
@@ -789,8 +871,8 @@ export default function AdminDashboard() {
       {!isMobile && (
         <div
           style={{
-            width: "310px",
-            minWidth: "290px",
+            width: isTablet ? "275px" : "315px",
+            minWidth: isTablet ? "255px" : "295px",
             background: "white",
             borderRight: "1px solid #e2e8f0",
             padding: "20px",
@@ -800,6 +882,8 @@ export default function AdminDashboard() {
             position: "sticky",
             top: 0,
             boxSizing: "border-box",
+            flexShrink: 0,
+            boxShadow: "4px 0 20px -12px rgba(15, 23, 42, 0.08)",
           }}
         >
           {sidebarContent}
@@ -811,13 +895,83 @@ export default function AdminDashboard() {
         style={{
           flex: 1,
           minWidth: 0,
-          padding: isMobile ? "16px" : "30px 32px",
+          padding: isMobile ? "14px" : isTablet ? "22px" : "30px 32px",
           boxSizing: "border-box",
-          maxWidth: "1100px",
+          maxWidth: "1120px",
           width: "100%",
           margin: "0 auto",
         }}
       >
+        {/* Premium Brand Banner */}
+        <div
+          style={{
+            background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+            border: "1px solid #e2e8f0",
+            borderRadius: isMobile ? "16px" : "20px",
+            padding: isMobile ? "14px 16px" : "18px 24px",
+            marginBottom: isMobile ? "14px" : "20px",
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "12px",
+            boxShadow: "0 8px 20px -10px rgba(15, 23, 42, 0.06)",
+            boxSizing: "border-box",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              minWidth: 0,
+            }}
+          >
+            {renderPharmaEmblem(isMobile ? 36 : 42)}
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: isMobile ? "15.5px" : "19px",
+                  fontWeight: "800",
+                  background:
+                    "linear-gradient(135deg, #0f172a 0%, #1d4ed8 70%, #2563eb 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  lineHeight: 1.2,
+                  wordBreak: "break-word",
+                }}
+              >
+                Sheikh Drugs Pharma
+              </div>
+              <div
+                style={{
+                  fontSize: "12px",
+                  color: "#64748b",
+                  fontWeight: "600",
+                  marginTop: "3px",
+                }}
+              >
+                Medicine Directory Management Console
+              </div>
+            </div>
+          </div>
+
+          <span
+            style={{
+              background: "#eff6ff",
+              color: "#1d4ed8",
+              border: "1px solid #bfdbfe",
+              padding: "6px 12px",
+              borderRadius: "999px",
+              fontSize: "12px",
+              fontWeight: "700",
+              whiteSpace: "nowrap",
+            }}
+          >
+            🏢 {selectedCompany}
+          </span>
+        </div>
+
         {/* Top Summary Bar */}
         <div
           style={{
@@ -835,15 +989,17 @@ export default function AdminDashboard() {
               border: "1px solid #e2e8f0",
               borderRadius: "16px",
               padding: "14px 16px",
-              boxShadow: "0 4px 12px rgba(15, 23, 42, 0.03)",
+              boxShadow: "0 6px 16px -8px rgba(15, 23, 42, 0.06)",
             }}
           >
-            <div style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>
+            <div
+              style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}
+            >
               Total Companies
             </div>
             <div
               style={{
-                fontSize: "20px",
+                fontSize: "21px",
                 fontWeight: "800",
                 color: "#0f172a",
                 marginTop: "4px",
@@ -859,15 +1015,17 @@ export default function AdminDashboard() {
               border: "1px solid #e2e8f0",
               borderRadius: "16px",
               padding: "14px 16px",
-              boxShadow: "0 4px 12px rgba(15, 23, 42, 0.03)",
+              boxShadow: "0 6px 16px -8px rgba(15, 23, 42, 0.06)",
             }}
           >
-            <div style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>
+            <div
+              style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}
+            >
               Total Saved Medicines
             </div>
             <div
               style={{
-                fontSize: "20px",
+                fontSize: "21px",
                 fontWeight: "800",
                 color: "#2563eb",
                 marginTop: "4px",
@@ -883,15 +1041,17 @@ export default function AdminDashboard() {
               border: "1px solid #e2e8f0",
               borderRadius: "16px",
               padding: "14px 16px",
-              boxShadow: "0 4px 12px rgba(15, 23, 42, 0.03)",
+              boxShadow: "0 6px 16px -8px rgba(15, 23, 42, 0.06)",
             }}
           >
-            <div style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>
+            <div
+              style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}
+            >
               In Selected Company
             </div>
             <div
               style={{
-                fontSize: "20px",
+                fontSize: "21px",
                 fontWeight: "800",
                 color: "#059669",
                 marginTop: "4px",
@@ -906,11 +1066,11 @@ export default function AdminDashboard() {
         <div
           style={{
             background: "white",
-            padding: isMobile ? "18px" : "28px 32px",
+            padding: isMobile ? "16px" : "28px 32px",
             borderRadius: isMobile ? "18px" : "22px",
             border: "1px solid #e2e8f0",
-            boxShadow: "0 10px 25px -10px rgba(15, 23, 42, 0.06)",
-            marginBottom: isMobile ? "18px" : "26px",
+            boxShadow: "0 12px 28px -12px rgba(15, 23, 42, 0.08)",
+            marginBottom: isMobile ? "16px" : "26px",
             boxSizing: "border-box",
           }}
         >
@@ -945,7 +1105,7 @@ export default function AdminDashboard() {
                 style={{
                   margin: 0,
                   color: "#0f172a",
-                  fontSize: isMobile ? "18px" : "22px",
+                  fontSize: isMobile ? "17.5px" : "22px",
                   fontWeight: "800",
                   lineHeight: "1.35",
                   wordBreak: "break-word",
@@ -1024,7 +1184,7 @@ export default function AdminDashboard() {
                   border: "1px solid #cbd5e1",
                   background: "#f8fafc",
                   outline: "none",
-                  fontSize: "15px",
+                  fontSize: isMobile ? "14px" : "15px",
                   color: "#0f172a",
                 }}
                 required
@@ -1087,7 +1247,13 @@ export default function AdminDashboard() {
                       flexShrink: 0,
                     }}
                   />
-                  <div style={{ fontSize: "12px", color: "#475569", minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#475569",
+                      minWidth: 0,
+                    }}
+                  >
                     <div style={{ fontWeight: "700", color: "#0f172a" }}>
                       {imageFile
                         ? `Selected: ${imageFile.name}`
@@ -1129,7 +1295,7 @@ export default function AdminDashboard() {
                   border: "1px solid #cbd5e1",
                   background: "#f8fafc",
                   outline: "none",
-                  fontSize: "15px",
+                  fontSize: isMobile ? "14px" : "15px",
                   color: "#0f172a",
                   fontFamily: "inherit",
                   resize: "vertical",
@@ -1163,7 +1329,7 @@ export default function AdminDashboard() {
                   border: "1px solid #cbd5e1",
                   background: "#f8fafc",
                   outline: "none",
-                  fontSize: "15px",
+                  fontSize: isMobile ? "14px" : "15px",
                   color: "#0f172a",
                   fontFamily: "inherit",
                   resize: "vertical",
@@ -1197,7 +1363,7 @@ export default function AdminDashboard() {
                   border: "1px solid #cbd5e1",
                   background: "#f8fafc",
                   outline: "none",
-                  fontSize: "15px",
+                  fontSize: isMobile ? "14px" : "15px",
                   color: "#0f172a",
                   fontFamily: "inherit",
                   resize: "vertical",
@@ -1236,10 +1402,10 @@ export default function AdminDashboard() {
         <div
           style={{
             background: "white",
-            padding: isMobile ? "18px" : "28px",
+            padding: isMobile ? "16px" : "28px",
             borderRadius: isMobile ? "18px" : "22px",
             border: "1px solid #e2e8f0",
-            boxShadow: "0 10px 25px -10px rgba(15, 23, 42, 0.06)",
+            boxShadow: "0 12px 28px -12px rgba(15, 23, 42, 0.08)",
             boxSizing: "border-box",
           }}
         >
@@ -1276,7 +1442,9 @@ export default function AdminDashboard() {
               Ei company-r kono medicine database-e nei.
             </p>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+            >
               {companyMedicines.map((med) => (
                 <div
                   key={med._id}

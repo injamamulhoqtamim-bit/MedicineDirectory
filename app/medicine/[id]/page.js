@@ -3,12 +3,42 @@ import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { initialMedicines } from "../../data/medicines";
 
+function findLocalMedicine(id) {
+  if (!id) return null;
+
+  try {
+    const cachedList = JSON.parse(
+      sessionStorage.getItem("allMedicinesCache") || "[]"
+    );
+    if (Array.isArray(cachedList)) {
+      const fromCache = cachedList.find(
+        (med) =>
+          String(med?._id) === String(id) || String(med?.id) === String(id)
+      );
+      if (fromCache) return fromCache;
+    }
+  } catch {
+    // ignore storage errors
+  }
+
+  if (Array.isArray(initialMedicines)) {
+    return (
+      initialMedicines.find(
+        (med) =>
+          String(med?.id) === String(id) || String(med?._id) === String(id)
+      ) || null
+    );
+  }
+
+  return null;
+}
+
 export default function MedicineDetail({ params }) {
   const unwrappedParams = use(params);
   const { id } = unwrappedParams;
 
-  const [medicine, setMedicine] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [medicine, setMedicine] = useState(() => findLocalMedicine(id));
+  const [syncing, setSyncing] = useState(() => !findLocalMedicine(id));
   const [viewport, setViewport] = useState("desktop"); // "mobile" | "tablet" | "desktop"
 
   useEffect(() => {
@@ -30,50 +60,51 @@ export default function MedicineDetail({ params }) {
 
   useEffect(() => {
     let isMounted = true;
+    const instantMatch = findLocalMedicine(id);
 
-    async function fetchDetail() {
-      setLoading(true);
+    if (instantMatch) {
+      setMedicine(instantMatch);
+      setSyncing(false);
+    } else {
+      setSyncing(true);
+    }
+
+    async function syncFreshDetail() {
       try {
         const res = await fetch("/api/medicines", { cache: "no-store" });
         const text = await res.text();
         if (res.ok && text) {
           const result = JSON.parse(text);
           if (result.success && Array.isArray(result.data)) {
+            try {
+              sessionStorage.setItem(
+                "allMedicinesCache",
+                JSON.stringify(result.data)
+              );
+            } catch {
+              // ignore quota errors
+            }
+
             const foundDb = result.data.find(
-              (med) => String(med._id) === String(id)
+              (med) =>
+                String(med?._id) === String(id) ||
+                String(med?.id) === String(id)
             );
-            if (foundDb) {
-              if (isMounted) {
-                setMedicine(foundDb);
-                setLoading(false);
-              }
-              return;
+            if (foundDb && isMounted) {
+              setMedicine(foundDb);
             }
           }
         }
-
-        const foundStatic = initialMedicines.find(
-          (med) => String(med.id) === String(id)
-        );
-        if (isMounted) {
-          setMedicine(foundStatic || null);
-        }
       } catch (err) {
-        console.error("Error fetching detail:", err);
-        const foundStatic = initialMedicines.find(
-          (med) => String(med.id) === String(id)
-        );
-        if (isMounted) {
-          setMedicine(foundStatic || null);
-        }
+        console.error("Background sync error:", err);
       } finally {
         if (isMounted) {
-          setLoading(false);
+          setSyncing(false);
         }
       }
     }
 
-    fetchDetail();
+    syncFreshDetail();
 
     return () => {
       isMounted = false;
@@ -83,7 +114,7 @@ export default function MedicineDetail({ params }) {
   const isMobile = viewport === "mobile";
   const isTablet = viewport === "tablet";
 
-  if (loading) {
+  if (!medicine && syncing) {
     return (
       <main
         className="container"
@@ -91,14 +122,45 @@ export default function MedicineDetail({ params }) {
           width: "100%",
           maxWidth: "880px",
           margin: "0 auto",
-          textAlign: "center",
-          padding: isMobile ? "40px 16px" : "60px 24px",
+          padding: isMobile ? "14px" : isTablet ? "22px 20px" : "30px 24px",
           boxSizing: "border-box",
         }}
       >
-        <p style={{ margin: 0, fontSize: "15px", color: "#475569", fontWeight: "500" }}>
-          লোড হচ্ছে...
-        </p>
+        <div
+          style={{
+            background: "white",
+            padding: isMobile ? "20px" : "32px",
+            borderRadius: isMobile ? "16px" : "22px",
+            border: "1px solid #e2e8f0",
+            boxShadow: "0 10px 25px -10px rgba(15, 23, 42, 0.06)",
+          }}
+        >
+          <div
+            style={{
+              height: isMobile ? "180px" : "240px",
+              borderRadius: "14px",
+              background: "#f1f5f9",
+              marginBottom: "18px",
+            }}
+          />
+          <div
+            style={{
+              height: "24px",
+              width: "60%",
+              borderRadius: "8px",
+              background: "#e2e8f0",
+              marginBottom: "10px",
+            }}
+          />
+          <div
+            style={{
+              height: "16px",
+              width: "35%",
+              borderRadius: "8px",
+              background: "#f1f5f9",
+            }}
+          />
+        </div>
       </main>
     );
   }
@@ -153,29 +215,70 @@ export default function MedicineDetail({ params }) {
         boxSizing: "border-box",
       }}
     >
-      <Link
-        href="/"
-        className="back-link"
+      <div
         style={{
-          display: "inline-flex",
+          display: "flex",
+          flexWrap: "wrap",
           alignItems: "center",
-          gap: "6px",
-          fontSize: isMobile ? "14px" : "15px",
-          fontWeight: "600",
+          justifyContent: "space-between",
+          gap: "10px",
         }}
       >
-        ← হোমপেজে ফিরে যান
-      </Link>
+        <Link
+          href="/"
+          className="back-link"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            fontSize: isMobile ? "14px" : "15px",
+            fontWeight: "600",
+          }}
+        >
+          ← হোমপেজে ফিরে যান
+        </Link>
+
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "7px",
+            fontSize: "12px",
+            fontWeight: "700",
+            color: "#1d4ed8",
+            background: "#eff6ff",
+            border: "1px solid #bfdbfe",
+            padding: "5px 11px",
+            borderRadius: "999px",
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#2563eb"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
+            <path d="m8.5 8.5 7 7" />
+          </svg>
+          Sheikh Drugs Pharma
+        </span>
+      </div>
 
       <div
         className="detail-box"
         style={{
           background: "white",
           padding: isMobile ? "16px" : isTablet ? "24px" : "32px",
-          borderRadius: isMobile ? "16px" : "20px",
+          borderRadius: isMobile ? "16px" : "22px",
           marginTop: isMobile ? "12px" : "18px",
           border: "1px solid #e2e8f0",
-          boxShadow: "0 4px 14px rgba(15, 23, 42, 0.04)",
+          boxShadow: "0 12px 28px -12px rgba(15, 23, 42, 0.08)",
           boxSizing: "border-box",
           width: "100%",
           overflow: "hidden",
@@ -192,6 +295,7 @@ export default function MedicineDetail({ params }) {
             <img
               src={medicine.image}
               alt={medicine.name}
+              decoding="async"
               onError={(e) => {
                 e.currentTarget.style.display = "none";
               }}
@@ -212,8 +316,9 @@ export default function MedicineDetail({ params }) {
         <h1
           style={{
             marginTop: 0,
-            color: "#1e293b",
+            color: "#0f172a",
             fontSize: isMobile ? "21px" : isTablet ? "25px" : "28px",
+            fontWeight: "800",
             lineHeight: "1.3",
             marginBottom: "6px",
             wordBreak: "break-word",
@@ -226,7 +331,7 @@ export default function MedicineDetail({ params }) {
         <p
           style={{
             color: "#2563eb",
-            fontWeight: "600",
+            fontWeight: "700",
             fontSize: isMobile ? "14px" : "16px",
             lineHeight: "1.45",
             marginBottom: isMobile ? "18px" : "24px",
@@ -241,9 +346,9 @@ export default function MedicineDetail({ params }) {
           style={{
             background: "#f8fafc",
             padding: isMobile ? "14px" : "16px 18px",
-            borderRadius: "12px",
+            borderRadius: "14px",
             marginBottom: "14px",
-            border: "1px solid #f1f5f9",
+            border: "1px solid #e2e8f0",
           }}
         >
           <h3
@@ -275,9 +380,9 @@ export default function MedicineDetail({ params }) {
           style={{
             background: "#f8fafc",
             padding: isMobile ? "14px" : "16px 18px",
-            borderRadius: "12px",
+            borderRadius: "14px",
             marginBottom: "14px",
-            border: "1px solid #f1f5f9",
+            border: "1px solid #e2e8f0",
           }}
         >
           <h3
@@ -309,8 +414,8 @@ export default function MedicineDetail({ params }) {
           style={{
             background: "#f8fafc",
             padding: isMobile ? "14px" : "16px 18px",
-            borderRadius: "12px",
-            border: "1px solid #f1f5f9",
+            borderRadius: "14px",
+            border: "1px solid #e2e8f0",
           }}
         >
           <h3
