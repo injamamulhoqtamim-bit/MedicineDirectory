@@ -272,8 +272,8 @@ export default function Home() {
         style={{
           position: "relative",
           overflow: "hidden",
-          padding: isMobile ? "24px 16px" : isTablet ? "32px 28px" : "38px 34px",
-          minHeight: isMobile ? "144px" : "176px",
+          padding: isMobile ? "24px 16px" : isTablet ? "32px 28px" : "40px 34px",
+          minHeight: isMobile ? "168px" : "198px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -310,7 +310,7 @@ export default function Home() {
             position: "absolute",
             inset: 0,
             background: hasHeroImage
-              ? "linear-gradient(135deg, rgba(15, 23, 42, 0.65) 0%, rgba(15, 23, 42, 0.42) 100%)"
+              ? "linear-gradient(135deg, rgba(15, 23, 42, 0.68) 0%, rgba(15, 23, 42, 0.45) 100%)"
               : "linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 55%, #0284c7 100%)",
             pointerEvents: "none",
             zIndex: 1,
@@ -328,29 +328,43 @@ export default function Home() {
             justifyContent: "center",
             textAlign: "center",
             width: "100%",
-            maxWidth: "780px",
+            maxWidth: "800px",
+            gap: isMobile ? "4px" : "6px",
           }}
         >
           <h1
             className="header-title"
             style={{
-              fontSize: isMobile ? "20px" : isTablet ? "25px" : "29px",
+              fontSize: isMobile ? "19px" : isTablet ? "24px" : "28px",
               fontWeight: "800",
               lineHeight: "1.3",
-              margin: "0 0 6px 0",
+              margin: 0,
               color: "#ffffff",
               textShadow: "0 2px 10px rgba(0, 0, 0, 0.4)",
               wordBreak: "break-word",
             }}
           >
-            ঔষধ / কোম্পানির নাম সার্চ করুন • ঔষধ সম্পর্কে জানুন
+            ঔষধ / কোম্পানির নাম সার্চ করুন
           </h1>
+          <h2
+            style={{
+              fontSize: isMobile ? "16px" : isTablet ? "20px" : "22px",
+              fontWeight: "700",
+              lineHeight: "1.35",
+              margin: 0,
+              color: "#e0f2fe",
+              textShadow: "0 2px 8px rgba(0, 0, 0, 0.38)",
+              wordBreak: "break-word",
+            }}
+          >
+            ঔষধ সম্পর্কে জানুন
+          </h2>
           <p
             className="header-subtitle"
             style={{
-              fontSize: isMobile ? "13.5px" : "15px",
+              fontSize: isMobile ? "13px" : "15px",
               lineHeight: "1.5",
-              margin: 0,
+              margin: "2px 0 0 0",
               color: "rgba(255, 255, 255, 0.94)",
               textShadow: "0 1px 6px rgba(0, 0, 0, 0.35)",
               wordBreak: "break-word",
