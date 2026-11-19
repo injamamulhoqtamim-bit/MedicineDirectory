@@ -169,13 +169,13 @@ export default function Navbar() {
               background: "linear-gradient(135deg, #1e40af 0%, #2563eb 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
-              fontSize: isMobile ? "16.5px" : isTablet ? "18px" : "20px",
+              fontSize: isMobile ? "16px" : isTablet ? "17.5px" : "19px",
               fontWeight: "800",
               letterSpacing: "-0.02em",
               whiteSpace: "nowrap",
             }}
           >
-            MedDirectory
+            Sheikh Drugs Pharma
           </span>
         </button>
 
