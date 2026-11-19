@@ -1,15 +1,16 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { CompanyList } from "../../data/medicines";
 
 export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCompany, setSelectedCompany] = useState(CompanyList[0]);
+  const [selectedCompany, setSelectedCompany] = useState(CompanyList[0] || "");
   const [selectedMedicineName, setSelectedMedicineName] = useState("");
 
   // Form fields
   const [imageFile, setImageFile] = useState(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState("");
   const [existingImage, setExistingImage] = useState("");
   const [uses, setUses] = useState("");
   const [dosage, setDosage] = useState("");
@@ -46,6 +47,16 @@ export default function AdminDashboard() {
     return () => window.removeEventListener("resize", checkViewport);
   }, []);
 
+  useEffect(() => {
+    if (!imageFile) {
+      setImagePreviewUrl("");
+      return;
+    }
+    const objectUrl = URL.createObjectURL(imageFile);
+    setImagePreviewUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [imageFile]);
+
   const showToast = useCallback((type, message) => {
     setToast({ type, message });
     setTimeout(() => {
@@ -79,18 +90,21 @@ export default function AdminDashboard() {
     fetchMedicines();
   }, [fetchMedicines]);
 
-  const filteredCompanies = CompanyList.filter((comp) =>
-    comp.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredCompanies = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return CompanyList;
+    return CompanyList.filter((comp) => comp.toLowerCase().includes(q));
+  }, [searchTerm]);
 
-  const companyMedicines = medicines.filter(
-    (med) => med.company === selectedCompany
-  );
+  const companyMedicines = useMemo(() => {
+    return medicines.filter((med) => med.company === selectedCompany);
+  }, [medicines, selectedCompany]);
 
   const resetForm = () => {
     setEditingId(null);
     setSelectedMedicineName("");
     setImageFile(null);
+    setImagePreviewUrl("");
     setExistingImage("");
     setUses("");
     setDosage("");
@@ -104,10 +118,11 @@ export default function AdminDashboard() {
 
   const handleEditClick = (med) => {
     setEditingId(med._id);
-    setSelectedCompany(med.company || CompanyList[0]);
+    setSelectedCompany(med.company || CompanyList[0] || "");
     setSelectedMedicineName(med.name || "");
     setExistingImage(med.image || "");
     setImageFile(null);
+    setImagePreviewUrl("");
     setUses(med.uses || "");
     setDosage(med.dosage || "");
     setSideEffects(med.sideEffects || "");
@@ -172,7 +187,9 @@ export default function AdminDashboard() {
         if (uploadResult.success && uploadResult.imageUrl) {
           imageUrl = uploadResult.imageUrl;
         } else {
-          setSuccessMsg("Image upload error: " + (uploadResult.error || "Failed"));
+          setSuccessMsg(
+            "Image upload error: " + (uploadResult.error || "Failed")
+          );
           setUploading(false);
           return;
         }
@@ -202,11 +219,15 @@ export default function AdminDashboard() {
           setMedicines((prev) =>
             prev.map((item) => (item._id === editingId ? data.data : item))
           );
-          setSuccessMsg("Successfully update hoyeche! Frontend-e giye check korte paren.");
+          setSuccessMsg(
+            "Successfully update hoyeche! Frontend-e giye check korte paren."
+          );
           showToast("success", `"${data.data.name}" সফলভাবে আপডেট হয়েছে!`);
         } else {
           setMedicines((prev) => [data.data, ...prev]);
-          setSuccessMsg("Successfully database-e save hoyeche! Frontend-e giye check korte paren.");
+          setSuccessMsg(
+            "Successfully database-e save hoyeche! Frontend-e giye check korte paren."
+          );
           showToast("success", `"${data.data.name}" সফলভাবে সেভ হয়েছে!`);
         }
         resetForm();
@@ -222,6 +243,8 @@ export default function AdminDashboard() {
     }
   };
 
+  const activePreviewImage = imagePreviewUrl || existingImage;
+
   const sidebarContent = (
     <>
       <div
@@ -229,26 +252,52 @@ export default function AdminDashboard() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "18px",
+          marginBottom: "16px",
           gap: "8px",
         }}
       >
-        <h2 style={{ margin: 0, color: "#2563eb", fontSize: "18px" }}>
-          🛠️ Admin Panel
-        </h2>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span
+            style={{
+              width: "32px",
+              height: "32px",
+              borderRadius: "10px",
+              background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+              color: "white",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "15px",
+              boxShadow: "0 6px 12px -4px rgba(37, 99, 235, 0.45)",
+            }}
+          >
+            🛠️
+          </span>
+          <h2
+            style={{
+              margin: 0,
+              color: "#0f172a",
+              fontSize: "17px",
+              fontWeight: "800",
+            }}
+          >
+            Admin Panel
+          </h2>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           <button
             type="button"
             onClick={handleLogout}
             style={{
-              background: "#fee2e2",
-              color: "#ef4444",
-              border: "none",
+              background: "#fef2f2",
+              color: "#dc2626",
+              border: "1px solid #fecaca",
               padding: "6px 10px",
-              borderRadius: "8px",
+              borderRadius: "9px",
               cursor: "pointer",
               fontSize: "12px",
-              fontWeight: "600",
+              fontWeight: "700",
             }}
           >
             Logout
@@ -263,7 +312,7 @@ export default function AdminDashboard() {
                 color: "#334155",
                 border: "none",
                 padding: "6px 10px",
-                borderRadius: "8px",
+                borderRadius: "9px",
                 cursor: "pointer",
                 fontSize: "13px",
                 fontWeight: "700",
@@ -276,22 +325,48 @@ export default function AdminDashboard() {
       </div>
 
       {/* Search Input in Sidebar */}
-      <div style={{ marginBottom: "14px" }}>
+      <div style={{ marginBottom: "14px", position: "relative" }}>
         <input
           type="text"
-          placeholder="Search company..."
+          placeholder="🔍 Search company..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{
             width: "100%",
             boxSizing: "border-box",
-            padding: "10px 14px",
-            borderRadius: "10px",
+            padding: "10px 34px 10px 12px",
+            borderRadius: "11px",
             border: "1px solid #cbd5e1",
+            background: "#f8fafc",
             outline: "none",
-            fontSize: "14px",
+            fontSize: "13.5px",
+            color: "#0f172a",
           }}
         />
+        {searchTerm && (
+          <button
+            type="button"
+            onClick={() => setSearchTerm("")}
+            aria-label="Clear company search"
+            style={{
+              position: "absolute",
+              right: "8px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              background: "#e2e8f0",
+              color: "#334155",
+              border: "none",
+              borderRadius: "50%",
+              width: "20px",
+              height: "20px",
+              fontSize: "11px",
+              fontWeight: "700",
+              cursor: "pointer",
+            }}
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {/* Company List */}
@@ -299,7 +374,7 @@ export default function AdminDashboard() {
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "6px",
+          gap: "5px",
           overflowY: "auto",
           flex: 1,
           paddingRight: "2px",
@@ -307,44 +382,73 @@ export default function AdminDashboard() {
       >
         <p
           style={{
-            fontSize: "12px",
+            fontSize: "11.5px",
             fontWeight: "700",
             color: "#64748b",
-            margin: "4px 0",
+            margin: "2px 0 6px 0",
+            letterSpacing: "0.03em",
           }}
         >
           COMPANIES ({filteredCompanies.length})
         </p>
-        {filteredCompanies.map((comp, index) => (
-          <button
-            type="button"
-            key={index}
-            onClick={() => {
-              setSelectedCompany(comp);
-              if (!editingId) {
-                setSelectedMedicineName("");
-              }
-              if (isMobile) {
-                setMobileSidebarOpen(false);
-              }
-            }}
-            style={{
-              textAlign: "left",
-              padding: "10px 12px",
-              borderRadius: "10px",
-              border: "none",
-              background: selectedCompany === comp ? "#eff6ff" : "transparent",
-              color: selectedCompany === comp ? "#2563eb" : "#334155",
-              fontWeight: selectedCompany === comp ? "600" : "500",
-              cursor: "pointer",
-              fontSize: "13px",
-              transition: "all 0.2s",
-              lineHeight: "1.4",
-            }}
-          >
-            🏢 {comp}
-          </button>
-        ))}
+        {filteredCompanies.map((comp, index) => {
+          const isActive = selectedCompany === comp;
+          const countForComp = medicines.filter(
+            (m) => m.company === comp
+          ).length;
+
+          return (
+            <button
+              type="button"
+              key={index}
+              onClick={() => {
+                setSelectedCompany(comp);
+                if (!editingId) {
+                  setSelectedMedicineName("");
+                }
+                if (isMobile) {
+                  setMobileSidebarOpen(false);
+                }
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "8px",
+                textAlign: "left",
+                padding: "9px 11px",
+                borderRadius: "10px",
+                border: isActive ? "1px solid #bfdbfe" : "1px solid transparent",
+                background: isActive ? "#eff6ff" : "transparent",
+                color: isActive ? "#1d4ed8" : "#334155",
+                fontWeight: isActive ? "700" : "500",
+                cursor: "pointer",
+                fontSize: "12.5px",
+                transition: "all 0.15s ease",
+                lineHeight: "1.35",
+              }}
+            >
+              <span style={{ minWidth: 0, wordBreak: "break-word" }}>
+                🏢 {comp}
+              </span>
+              {countForComp > 0 && (
+                <span
+                  style={{
+                    fontSize: "11px",
+                    fontWeight: "700",
+                    padding: "2px 7px",
+                    borderRadius: "999px",
+                    background: isActive ? "#2563eb" : "#e2e8f0",
+                    color: isActive ? "#ffffff" : "#475569",
+                    flexShrink: 0,
+                  }}
+                >
+                  {countForComp}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
     </>
   );
@@ -355,7 +459,8 @@ export default function AdminDashboard() {
         display: "flex",
         flexDirection: isMobile ? "column" : "row",
         minHeight: "100vh",
-        background: "#f8fafc",
+        background:
+          "linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)",
         width: "100%",
         overflowX: "hidden",
       }}
@@ -477,8 +582,7 @@ export default function AdminDashboard() {
               borderRadius: "24px",
               padding: isMobile ? "22px" : "28px",
               border: "1px solid #e2e8f0",
-              boxShadow:
-                "0 25px 50px -12px rgba(15, 23, 42, 0.35)",
+              boxShadow: "0 25px 50px -12px rgba(15, 23, 42, 0.35)",
               textAlign: "center",
             }}
           >
@@ -586,7 +690,8 @@ export default function AdminDashboard() {
             position: "sticky",
             top: 0,
             zIndex: 40,
-            background: "white",
+            background: "rgba(255, 255, 255, 0.96)",
+            backdropFilter: "blur(10px)",
             borderBottom: "1px solid #e2e8f0",
             padding: "12px 16px",
             display: "flex",
@@ -606,7 +711,7 @@ export default function AdminDashboard() {
               borderRadius: "10px",
               cursor: "pointer",
               fontSize: "13px",
-              fontWeight: "600",
+              fontWeight: "700",
               flexShrink: 0,
             }}
           >
@@ -616,8 +721,8 @@ export default function AdminDashboard() {
           <div
             style={{
               fontSize: "13px",
-              fontWeight: "600",
-              color: "#1e293b",
+              fontWeight: "700",
+              color: "#0f172a",
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -632,14 +737,14 @@ export default function AdminDashboard() {
             type="button"
             onClick={handleLogout}
             style={{
-              background: "#fee2e2",
-              color: "#ef4444",
-              border: "none",
+              background: "#fef2f2",
+              color: "#dc2626",
+              border: "1px solid #fecaca",
               padding: "8px 10px",
               borderRadius: "10px",
               cursor: "pointer",
               fontSize: "12px",
-              fontWeight: "600",
+              fontWeight: "700",
               flexShrink: 0,
             }}
           >
@@ -684,8 +789,8 @@ export default function AdminDashboard() {
       {!isMobile && (
         <div
           style={{
-            width: "300px",
-            minWidth: "280px",
+            width: "310px",
+            minWidth: "290px",
             background: "white",
             borderRight: "1px solid #e2e8f0",
             padding: "20px",
@@ -706,18 +811,106 @@ export default function AdminDashboard() {
         style={{
           flex: 1,
           minWidth: 0,
-          padding: isMobile ? "16px" : "32px",
+          padding: isMobile ? "16px" : "30px 32px",
           boxSizing: "border-box",
+          maxWidth: "1100px",
+          width: "100%",
+          margin: "0 auto",
         }}
       >
+        {/* Top Summary Bar */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: isMobile
+              ? "1fr"
+              : "repeat(3, minmax(0, 1fr))",
+            gap: "12px",
+            marginBottom: isMobile ? "16px" : "22px",
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              border: "1px solid #e2e8f0",
+              borderRadius: "16px",
+              padding: "14px 16px",
+              boxShadow: "0 4px 12px rgba(15, 23, 42, 0.03)",
+            }}
+          >
+            <div style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>
+              Total Companies
+            </div>
+            <div
+              style={{
+                fontSize: "20px",
+                fontWeight: "800",
+                color: "#0f172a",
+                marginTop: "4px",
+              }}
+            >
+              {CompanyList.length}
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "white",
+              border: "1px solid #e2e8f0",
+              borderRadius: "16px",
+              padding: "14px 16px",
+              boxShadow: "0 4px 12px rgba(15, 23, 42, 0.03)",
+            }}
+          >
+            <div style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>
+              Total Saved Medicines
+            </div>
+            <div
+              style={{
+                fontSize: "20px",
+                fontWeight: "800",
+                color: "#2563eb",
+                marginTop: "4px",
+              }}
+            >
+              {medicines.length}
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "white",
+              border: "1px solid #e2e8f0",
+              borderRadius: "16px",
+              padding: "14px 16px",
+              boxShadow: "0 4px 12px rgba(15, 23, 42, 0.03)",
+            }}
+          >
+            <div style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>
+              In Selected Company
+            </div>
+            <div
+              style={{
+                fontSize: "20px",
+                fontWeight: "800",
+                color: "#059669",
+                marginTop: "4px",
+              }}
+            >
+              {companyMedicines.length}
+            </div>
+          </div>
+        </div>
+
+        {/* Add / Edit Medicine Card */}
         <div
           style={{
             background: "white",
-            padding: isMobile ? "18px" : "32px",
-            borderRadius: isMobile ? "16px" : "20px",
+            padding: isMobile ? "18px" : "28px 32px",
+            borderRadius: isMobile ? "18px" : "22px",
             border: "1px solid #e2e8f0",
-            boxShadow: "0 4px 6px rgba(0,0,0,0.02)",
-            marginBottom: isMobile ? "18px" : "28px",
+            boxShadow: "0 10px 25px -10px rgba(15, 23, 42, 0.06)",
+            marginBottom: isMobile ? "18px" : "26px",
             boxSizing: "border-box",
           }}
         >
@@ -728,20 +921,40 @@ export default function AdminDashboard() {
               justifyContent: "space-between",
               alignItems: "center",
               gap: "12px",
-              marginBottom: "16px",
+              marginBottom: "18px",
+              paddingBottom: "14px",
+              borderBottom: "1px solid #f1f5f9",
             }}
           >
-            <h2
-              style={{
-                margin: 0,
-                color: "#1e293b",
-                fontSize: isMobile ? "18px" : "22px",
-                lineHeight: "1.35",
-              }}
-            >
-              {editingId ? "Editing Medicine for: " : "Adding for: "}
-              <span style={{ color: "#2563eb" }}>{selectedCompany}</span>
-            </h2>
+            <div>
+              <span
+                style={{
+                  display: "inline-block",
+                  fontSize: "11.5px",
+                  fontWeight: "700",
+                  padding: "3px 10px",
+                  borderRadius: "999px",
+                  background: editingId ? "#fef3c7" : "#eff6ff",
+                  color: editingId ? "#b45309" : "#2563eb",
+                  marginBottom: "6px",
+                }}
+              >
+                {editingId ? "✏️ Edit Mode" : "➕ New Entry"}
+              </span>
+              <h2
+                style={{
+                  margin: 0,
+                  color: "#0f172a",
+                  fontSize: isMobile ? "18px" : "22px",
+                  fontWeight: "800",
+                  lineHeight: "1.35",
+                  wordBreak: "break-word",
+                }}
+              >
+                {editingId ? "Editing Medicine for: " : "Adding for: "}
+                <span style={{ color: "#2563eb" }}>{selectedCompany}</span>
+              </h2>
+            </div>
 
             {editingId && (
               <button
@@ -768,8 +981,9 @@ export default function AdminDashboard() {
               style={{
                 background: "#dcfce7",
                 color: "#166534",
+                border: "1px solid #86efac",
                 padding: "12px 14px",
-                borderRadius: "10px",
+                borderRadius: "12px",
                 marginBottom: "18px",
                 fontSize: "13.5px",
                 fontWeight: "600",
@@ -790,8 +1004,8 @@ export default function AdminDashboard() {
                 style={{
                   display: "block",
                   fontSize: "14px",
-                  fontWeight: "600",
-                  color: "#475569",
+                  fontWeight: "700",
+                  color: "#334155",
                   marginBottom: "8px",
                 }}
               >
@@ -808,21 +1022,23 @@ export default function AdminDashboard() {
                   padding: "12px 14px",
                   borderRadius: "12px",
                   border: "1px solid #cbd5e1",
+                  background: "#f8fafc",
                   outline: "none",
                   fontSize: "15px",
+                  color: "#0f172a",
                 }}
                 required
               />
             </div>
 
-            {/* Direct Image File Upload */}
+            {/* Direct Image File Upload + Preview */}
             <div>
               <label
                 style={{
                   display: "block",
                   fontSize: "14px",
-                  fontWeight: "600",
-                  color: "#475569",
+                  fontWeight: "700",
+                  color: "#334155",
                   marginBottom: "8px",
                 }}
               >
@@ -842,17 +1058,48 @@ export default function AdminDashboard() {
                   fontSize: "13.5px",
                 }}
               />
-              {editingId && existingImage && !imageFile && (
-                <p
+
+              {activePreviewImage && (
+                <div
                   style={{
-                    fontSize: "12px",
-                    color: "#64748b",
-                    marginTop: "6px",
-                    wordBreak: "break-all",
+                    marginTop: "10px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    padding: "10px",
+                    borderRadius: "12px",
+                    background: "#f8fafc",
+                    border: "1px solid #e2e8f0",
                   }}
                 >
-                  Current image kept unless a new image is selected ({existingImage}).
-                </p>
+                  <img
+                    src={activePreviewImage}
+                    alt="Medicine preview"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                    style={{
+                      width: "56px",
+                      height: "56px",
+                      objectFit: "cover",
+                      borderRadius: "10px",
+                      border: "1px solid #cbd5e1",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <div style={{ fontSize: "12px", color: "#475569", minWidth: 0 }}>
+                    <div style={{ fontWeight: "700", color: "#0f172a" }}>
+                      {imageFile
+                        ? `Selected: ${imageFile.name}`
+                        : "Current saved image"}
+                    </div>
+                    {!imageFile && editingId && (
+                      <div style={{ wordBreak: "break-all", marginTop: "2px" }}>
+                        {existingImage}
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
 
@@ -862,8 +1109,8 @@ export default function AdminDashboard() {
                 style={{
                   display: "block",
                   fontSize: "14px",
-                  fontWeight: "600",
-                  color: "#475569",
+                  fontWeight: "700",
+                  color: "#334155",
                   marginBottom: "8px",
                 }}
               >
@@ -880,8 +1127,10 @@ export default function AdminDashboard() {
                   padding: "12px 14px",
                   borderRadius: "12px",
                   border: "1px solid #cbd5e1",
+                  background: "#f8fafc",
                   outline: "none",
                   fontSize: "15px",
+                  color: "#0f172a",
                   fontFamily: "inherit",
                   resize: "vertical",
                 }}
@@ -894,8 +1143,8 @@ export default function AdminDashboard() {
                 style={{
                   display: "block",
                   fontSize: "14px",
-                  fontWeight: "600",
-                  color: "#475569",
+                  fontWeight: "700",
+                  color: "#334155",
                   marginBottom: "8px",
                 }}
               >
@@ -912,8 +1161,10 @@ export default function AdminDashboard() {
                   padding: "12px 14px",
                   borderRadius: "12px",
                   border: "1px solid #cbd5e1",
+                  background: "#f8fafc",
                   outline: "none",
                   fontSize: "15px",
+                  color: "#0f172a",
                   fontFamily: "inherit",
                   resize: "vertical",
                 }}
@@ -926,8 +1177,8 @@ export default function AdminDashboard() {
                 style={{
                   display: "block",
                   fontSize: "14px",
-                  fontWeight: "600",
-                  color: "#475569",
+                  fontWeight: "700",
+                  color: "#334155",
                   marginBottom: "8px",
                 }}
               >
@@ -944,8 +1195,10 @@ export default function AdminDashboard() {
                   padding: "12px 14px",
                   borderRadius: "12px",
                   border: "1px solid #cbd5e1",
+                  background: "#f8fafc",
                   outline: "none",
                   fontSize: "15px",
+                  color: "#0f172a",
                   fontFamily: "inherit",
                   resize: "vertical",
                 }}
@@ -956,15 +1209,18 @@ export default function AdminDashboard() {
               type="submit"
               disabled={uploading}
               style={{
-                background: uploading ? "#93c5fd" : "#2563eb",
+                background: uploading
+                  ? "#93c5fd"
+                  : "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
                 color: "white",
-                padding: "13px 22px",
+                padding: "13px 24px",
                 border: "none",
                 borderRadius: "12px",
-                fontWeight: "600",
+                fontWeight: "700",
                 fontSize: "15px",
                 cursor: uploading ? "not-allowed" : "pointer",
                 alignSelf: isMobile ? "stretch" : "flex-start",
+                boxShadow: "0 10px 20px -6px rgba(37, 99, 235, 0.4)",
               }}
             >
               {uploading
@@ -981,28 +1237,42 @@ export default function AdminDashboard() {
           style={{
             background: "white",
             padding: isMobile ? "18px" : "28px",
-            borderRadius: isMobile ? "16px" : "20px",
+            borderRadius: isMobile ? "18px" : "22px",
             border: "1px solid #e2e8f0",
-            boxShadow: "0 4px 6px rgba(0,0,0,0.02)",
+            boxShadow: "0 10px 25px -10px rgba(15, 23, 42, 0.06)",
             boxSizing: "border-box",
           }}
         >
-          <h3
+          <div
             style={{
-              marginTop: 0,
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "8px",
               marginBottom: "16px",
-              color: "#1e293b",
-              fontSize: isMobile ? "16px" : "18px",
-              lineHeight: "1.4",
             }}
           >
-            Saved Medicines in {selectedCompany} ({companyMedicines.length})
-          </h3>
+            <h3
+              style={{
+                margin: 0,
+                color: "#0f172a",
+                fontSize: isMobile ? "16px" : "18px",
+                fontWeight: "800",
+                lineHeight: "1.4",
+                wordBreak: "break-word",
+              }}
+            >
+              Saved Medicines in {selectedCompany} ({companyMedicines.length})
+            </h3>
+          </div>
 
           {loadingList ? (
-            <p style={{ color: "#64748b", fontSize: "14px" }}>Loading...</p>
+            <p style={{ color: "#64748b", fontSize: "14px", margin: 0 }}>
+              Loading...
+            </p>
           ) : companyMedicines.length === 0 ? (
-            <p style={{ color: "#64748b", fontSize: "14px" }}>
+            <p style={{ color: "#64748b", fontSize: "14px", margin: 0 }}>
               Ei company-r kono medicine database-e nei.
             </p>
           ) : (
@@ -1016,7 +1286,7 @@ export default function AdminDashboard() {
                     justifyContent: "space-between",
                     alignItems: isMobile ? "stretch" : "center",
                     padding: "14px 16px",
-                    borderRadius: "12px",
+                    borderRadius: "14px",
                     border: "1px solid #e2e8f0",
                     background: "#f8fafc",
                     gap: "12px",
@@ -1035,11 +1305,14 @@ export default function AdminDashboard() {
                       <img
                         src={med.image}
                         alt={med.name}
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
                         style={{
-                          width: "48px",
-                          height: "48px",
+                          width: "52px",
+                          height: "52px",
                           objectFit: "cover",
-                          borderRadius: "8px",
+                          borderRadius: "10px",
                           border: "1px solid #cbd5e1",
                           flexShrink: 0,
                         }}
@@ -1050,6 +1323,7 @@ export default function AdminDashboard() {
                         style={{
                           color: "#0f172a",
                           fontSize: "15px",
+                          fontWeight: "700",
                           display: "block",
                           wordBreak: "break-word",
                         }}
@@ -1058,13 +1332,28 @@ export default function AdminDashboard() {
                       </strong>
                       <div
                         style={{
-                          color: "#64748b",
+                          color: "#2563eb",
                           fontSize: "12px",
+                          fontWeight: "600",
                           wordBreak: "break-word",
+                          marginTop: "2px",
                         }}
                       >
                         {med.company}
                       </div>
+                      {med.uses && (
+                        <div
+                          style={{
+                            color: "#475569",
+                            fontSize: "12.5px",
+                            marginTop: "4px",
+                            lineHeight: "1.4",
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          💊 {med.uses}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -1085,10 +1374,10 @@ export default function AdminDashboard() {
                         color: "#1d4ed8",
                         border: "none",
                         padding: "8px 14px",
-                        borderRadius: "8px",
+                        borderRadius: "10px",
                         cursor: "pointer",
                         fontSize: "13px",
-                        fontWeight: "600",
+                        fontWeight: "700",
                       }}
                     >
                       Edit
@@ -1102,10 +1391,10 @@ export default function AdminDashboard() {
                         color: "#dc2626",
                         border: "none",
                         padding: "8px 14px",
-                        borderRadius: "8px",
+                        borderRadius: "10px",
                         cursor: "pointer",
                         fontSize: "13px",
-                        fontWeight: "600",
+                        fontWeight: "700",
                       }}
                     >
                       Delete
