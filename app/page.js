@@ -559,9 +559,10 @@ export default function Home() {
                 <div
                   style={{
                     display: "flex",
+                    flexDirection: isMobile ? "column" : "row",
                     flexWrap: "wrap",
                     justifyContent: "space-between",
-                    alignItems: "center",
+                    alignItems: isMobile ? "stretch" : "center",
                     gap: "10px",
                     marginTop: "16px",
                   }}
@@ -571,26 +572,61 @@ export default function Home() {
                     style={{
                       margin: 0,
                       fontSize: isMobile ? "13px" : "14px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: isMobile ? "center" : "flex-start",
+                      gap: "4px",
                     }}
                   >
                     ডিটেইলস দেখুন <span>→</span>
                   </span>
+
+                  {/* Premium Original "➕ নাই? সিলেক্ট করুন" Button */}
                   <button
                     type="button"
                     onClick={(e) => handleAddToNotification(e, med)}
                     style={{
-                      background: "#eff6ff",
-                      color: "#2563eb",
-                      border: "1px solid #dbeafe",
-                      padding: isMobile ? "6px 10px" : "7px 12px",
-                      borderRadius: "9px",
-                      fontSize: "12px",
-                      fontWeight: "600",
+                      background:
+                        "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
+                      color: "#1d4ed8",
+                      border: "1px solid #93c5fd",
+                      padding: isMobile ? "8px 12px" : "8px 14px",
+                      borderRadius: "11px",
+                      fontSize: isMobile ? "12.5px" : "13px",
+                      fontWeight: "700",
                       cursor: "pointer",
                       whiteSpace: "nowrap",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
+                      boxShadow:
+                        "0 4px 12px -3px rgba(37, 99, 235, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
+                      transition: "all 0.18s ease",
+                      width: isMobile ? "100%" : "auto",
+                      boxSizing: "border-box",
                     }}
                   >
-                    ➕ নাই? সিলেক্ট করুন
+                    <span
+                      style={{
+                        width: "18px",
+                        height: "18px",
+                        borderRadius: "6px",
+                        background:
+                          "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+                        color: "#ffffff",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "13px",
+                        fontWeight: "800",
+                        lineHeight: 1,
+                        flexShrink: 0,
+                      }}
+                    >
+                      +
+                    </span>
+                    <span>নাই? সিলেক্ট করুন</span>
                   </button>
                 </div>
               </Link>
