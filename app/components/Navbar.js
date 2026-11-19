@@ -60,9 +60,7 @@ export default function Navbar() {
 
   const broadcastSearch = (val) => {
     sessionStorage.setItem("medicineSearchTerm", val);
-    window.dispatchEvent(
-      new CustomEvent("navbarSearch", { detail: val })
-    );
+    window.dispatchEvent(new CustomEvent("navbarSearch", { detail: val }));
   };
 
   const handleSearchChange = (e) => {
@@ -100,8 +98,8 @@ export default function Navbar() {
         flexDirection: isMobile ? "column" : "row",
         justifyContent: "space-between",
         alignItems: isMobile ? "stretch" : "center",
-        gap: isMobile ? "10px" : "14px",
-        padding: isMobile ? "12px 14px" : isTablet ? "12px 20px" : "14px 26px",
+        gap: isMobile ? "10px" : isTablet ? "12px" : "16px",
+        padding: isMobile ? "10px 12px" : isTablet ? "12px 18px" : "14px 24px",
         background:
           "linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.96) 100%)",
         backdropFilter: "blur(14px)",
@@ -109,14 +107,15 @@ export default function Navbar() {
         boxShadow:
           "0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 4px 10px -6px rgba(15, 23, 42, 0.05)",
         borderRadius: isMobile ? "14px" : "18px",
-        marginTop: isMobile ? "10px" : "14px",
-        marginBottom: isMobile ? "14px" : "20px",
+        marginTop: isMobile ? "8px" : "14px",
+        marginBottom: isMobile ? "12px" : "20px",
         position: "sticky",
-        top: isMobile ? "10px" : "16px",
+        top: isMobile ? "8px" : "16px",
         zIndex: 1000,
         border: "1px solid rgba(226, 232, 240, 0.95)",
         boxSizing: "border-box",
         width: "100%",
+        maxWidth: "100%",
       }}
     >
       {/* Top Row on Mobile: Brand Logo + Requested Button */}
@@ -125,8 +124,9 @@ export default function Navbar() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          gap: "12px",
+          gap: "10px",
           width: isMobile ? "100%" : "auto",
+          minWidth: 0,
         }}
       >
         <button
@@ -144,18 +144,19 @@ export default function Navbar() {
             padding: 0,
             cursor: "pointer",
             minWidth: 0,
+            flexShrink: 0,
           }}
         >
           <span
             style={{
-              width: isMobile ? "34px" : "38px",
-              height: isMobile ? "34px" : "38px",
-              borderRadius: "12px",
+              width: isMobile ? "32px" : "38px",
+              height: isMobile ? "32px" : "38px",
+              borderRadius: "11px",
               background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: isMobile ? "17px" : "19px",
+              fontSize: isMobile ? "16px" : "19px",
               boxShadow: "0 6px 14px -3px rgba(37, 99, 235, 0.4)",
               flexShrink: 0,
             }}
@@ -168,7 +169,7 @@ export default function Navbar() {
               background: "linear-gradient(135deg, #1e40af 0%, #2563eb 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
-              fontSize: isMobile ? "17px" : isTablet ? "18px" : "20px",
+              fontSize: isMobile ? "16.5px" : isTablet ? "18px" : "20px",
               fontWeight: "800",
               letterSpacing: "-0.02em",
               whiteSpace: "nowrap",
@@ -186,8 +187,8 @@ export default function Navbar() {
               style={{
                 background: "#f8fafc",
                 border: "1px solid #e2e8f0",
-                padding: "9px",
-                borderRadius: "12px",
+                padding: "8px",
+                borderRadius: "11px",
                 cursor: "pointer",
                 position: "relative",
                 display: "flex",
@@ -199,8 +200,8 @@ export default function Navbar() {
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="19"
-                height="19"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="#475569"
@@ -220,10 +221,10 @@ export default function Navbar() {
                     background:
                       "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
                     color: "white",
-                    fontSize: "11px",
-                    minWidth: "20px",
-                    height: "20px",
-                    padding: "0 5px",
+                    fontSize: "10.5px",
+                    minWidth: "19px",
+                    height: "19px",
+                    padding: "0 4px",
                     borderRadius: "999px",
                     fontWeight: "700",
                     display: "flex",
@@ -248,22 +249,27 @@ export default function Navbar() {
           display: "flex",
           alignItems: "center",
           flex: isMobile ? "initial" : 1,
-          maxWidth: isMobile ? "100%" : "460px",
+          maxWidth: isMobile ? "100%" : isTablet ? "340px" : "460px",
           width: "100%",
+          minWidth: 0,
           background: "#f8fafc",
           border: "1px solid #cbd5e1",
           borderRadius: "12px",
-          padding: "4px 6px 4px 12px",
+          padding: isMobile ? "3px 5px 3px 10px" : "4px 6px 4px 12px",
           boxSizing: "border-box",
-          gap: "6px",
+          gap: "5px",
         }}
       >
-        <span style={{ fontSize: "14px", flexShrink: 0 }}>🔍</span>
+        <span style={{ fontSize: isMobile ? "13px" : "14px", flexShrink: 0 }}>
+          🔍
+        </span>
         <input
           type="text"
           value={searchQuery}
           onChange={handleSearchChange}
-          placeholder="ঔষধ বা কোম্পানির নাম সার্চ..."
+          placeholder={
+            isMobile ? "ঔষধ বা কোম্পানি সার্চ..." : "ঔষধ বা কোম্পানির নাম সার্চ..."
+          }
           aria-label="Search medicine or company"
           style={{
             flex: 1,
@@ -271,9 +277,9 @@ export default function Navbar() {
             border: "none",
             background: "transparent",
             outline: "none",
-            fontSize: isMobile ? "13.5px" : "14px",
+            fontSize: isMobile ? "13px" : "14px",
             color: "#0f172a",
-            padding: "6px 2px",
+            padding: isMobile ? "5px 2px" : "6px 2px",
           }}
         />
         {searchQuery && (
@@ -286,9 +292,9 @@ export default function Navbar() {
               color: "#334155",
               border: "none",
               borderRadius: "50%",
-              width: "24px",
-              height: "24px",
-              fontSize: "12px",
+              width: "22px",
+              height: "22px",
+              fontSize: "11px",
               fontWeight: "700",
               cursor: "pointer",
               display: "flex",
@@ -307,8 +313,8 @@ export default function Navbar() {
             color: "#ffffff",
             border: "none",
             borderRadius: "9px",
-            padding: isMobile ? "7px 11px" : "7px 14px",
-            fontSize: "12.5px",
+            padding: isMobile ? "6px 10px" : "7px 14px",
+            fontSize: isMobile ? "12px" : "12.5px",
             fontWeight: "600",
             cursor: "pointer",
             whiteSpace: "nowrap",
@@ -332,7 +338,7 @@ export default function Navbar() {
                 ? "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)"
                 : "#f8fafc",
               border: hoveredBtn ? "1px solid #93c5fd" : "1px solid #e2e8f0",
-              padding: "10px 12px",
+              padding: isTablet ? "9px 10px" : "10px 12px",
               borderRadius: "14px",
               cursor: "pointer",
               position: "relative",
@@ -363,16 +369,18 @@ export default function Navbar() {
               <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
             </svg>
 
-            <span
-              style={{
-                fontSize: "13px",
-                fontWeight: "600",
-                color: hoveredBtn ? "#1d4ed8" : "#334155",
-                whiteSpace: "nowrap",
-              }}
-            >
-              Requested
-            </span>
+            {!isTablet && (
+              <span
+                style={{
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: hoveredBtn ? "#1d4ed8" : "#334155",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Requested
+              </span>
+            )}
 
             {missingList.length > 0 && (
               <span
