@@ -2,6 +2,7 @@
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { initialMedicines } from "../../data/medicines";
+import AlternativeBrandsBox from "../../components/AlternativeBrandsBox";
 
 function findLocalMedicine(id) {
   if (!id) return null;
@@ -45,7 +46,6 @@ export default function MedicineDetail({ params }) {
   const unwrappedParams = use(params);
   const { id } = unwrappedParams;
 
-  // Keep initial state identical on SSR & first Client render to avoid hydration mismatch
   const [medicine, setMedicine] = useState(null);
   const [syncing, setSyncing] = useState(true);
   const [viewport, setViewport] = useState("desktop"); // "mobile" | "tablet" | "desktop"
@@ -80,7 +80,9 @@ export default function MedicineDetail({ params }) {
 
     async function syncFreshDetail() {
       try {
-        const res = await fetch("/api/medicines", { cache: "no-store" });
+        const res = await fetch(`/api/medicines?_t=${Date.now()}`, {
+          cache: "no-store",
+        });
         const text = await res.text();
         if (res.ok && text) {
           const result = JSON.parse(text);
@@ -633,6 +635,9 @@ export default function MedicineDetail({ params }) {
             {medicine.sideEffects || "তথ্য দেওয়া হয়নি"}
           </p>
         </div>
+
+        {/* Alternative Brands Section at the Bottom */}
+        <AlternativeBrandsBox medicine={medicine} />
       </div>
     </main>
   );

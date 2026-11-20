@@ -2,6 +2,35 @@ import { NextResponse } from "next/server";
 import dbConnect from "../../../lib/mongodb";
 import Medicine from "../../../models/Medicine";
 
+function sanitizeAlternatives(raw) {
+  let list = raw;
+  if (typeof raw === "string" && raw.trim()) {
+    try {
+      list = JSON.parse(raw);
+    } catch {
+      list = raw.split(",").map((part) => ({ name: part.trim(), company: "" }));
+    }
+  }
+
+  if (!Array.isArray(list)) return [];
+
+  return list
+    .map((item) => {
+      if (typeof item === "string") {
+        const s = item.trim();
+        return s ? { name: s, company: "" } : null;
+      }
+      if (item && typeof item === "object") {
+        const name = String(item?.name || item?.brandName || "").trim();
+        const company = String(item?.company || item?.companyName || "").trim();
+        if (!name && !company) return null;
+        return { name, company };
+      }
+      return null;
+    })
+    .filter(Boolean);
+}
+
 export async function GET() {
   try {
     await dbConnect();
@@ -44,6 +73,9 @@ export async function POST(request) {
       uses: String(body?.uses || "").trim(),
       dosage: String(body?.dosage || "").trim(),
       sideEffects: String(body?.sideEffects || "").trim(),
+      alternativeBrands: sanitizeAlternatives(
+        body?.alternativeBrands ?? body?.alternativeBrand
+      ),
     });
 
     return NextResponse.json(

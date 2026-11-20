@@ -7,6 +7,16 @@ function isValidObjectId(id) {
   return mongoose.Types.ObjectId.isValid(String(id || ""));
 }
 
+function sanitizeAlternatives(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((item) => ({
+      name: String(item?.name || "").trim(),
+      company: String(item?.company || "").trim(),
+    }))
+    .filter((item) => item.name || item.company);
+}
+
 export async function PUT(request, context) {
   try {
     await dbConnect();
@@ -64,6 +74,9 @@ export async function PUT(request, context) {
     }
     if (body?.sideEffects !== undefined) {
       updateFields.sideEffects = String(body.sideEffects || "").trim();
+    }
+    if (body?.alternativeBrands !== undefined) {
+      updateFields.alternativeBrands = sanitizeAlternatives(body.alternativeBrands);
     }
 
     const updatedMedicine = await Medicine.findByIdAndUpdate(

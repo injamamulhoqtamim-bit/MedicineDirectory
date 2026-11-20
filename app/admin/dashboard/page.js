@@ -4,6 +4,22 @@ import { useRouter } from "next/navigation";
 import { CompanyList } from "../../data/medicines";
 import LeftSidebar from "./LeftSidebar";
 import RightContent from "./RightContent";
+import { DeleteConfirmModal } from "./DeleteMedicineAction";
+
+const EMPTY_ALTERNATIVE_ROW = [{ name: "", company: "" }];
+
+const normalizeAlternativeRows = (med) => {
+  if (Array.isArray(med?.alternativeBrands) && med.alternativeBrands.length > 0) {
+    return med.alternativeBrands.map((item) => ({
+      name: String(item?.name || ""),
+      company: String(item?.company || ""),
+    }));
+  }
+  if (typeof med?.alternativeBrand === "string" && med.alternativeBrand.trim()) {
+    return [{ name: med.alternativeBrand.trim(), company: "" }];
+  }
+  return [{ name: "", company: "" }];
+};
 
 const renderPharmaEmblem = (size = 36) => (
   <span
@@ -57,6 +73,9 @@ export default function AdminDashboard() {
   const [uses, setUses] = useState("");
   const [dosage, setDosage] = useState("");
   const [sideEffects, setSideEffects] = useState("");
+  const [alternativeBrands, setAlternativeBrands] = useState(
+    EMPTY_ALTERNATIVE_ROW
+  );
 
   // Edit & list states
   const [medicines, setMedicines] = useState([]);
@@ -157,13 +176,26 @@ export default function AdminDashboard() {
       const unitMatch = String(med.unitPrice || "").toLowerCase().includes(q);
       const stripMatch = String(med.stripPrice || "").toLowerCase().includes(q);
       const boxMatch = String(med.boxPrice || "").toLowerCase().includes(q);
+      const altArrayMatch = Array.isArray(med.alternativeBrands)
+        ? med.alternativeBrands.some(
+            (a) =>
+              String(a?.name || "").toLowerCase().includes(q) ||
+              String(a?.company || "").toLowerCase().includes(q)
+          )
+        : false;
+      const altSingleMatch = String(med.alternativeBrand || "")
+        .toLowerCase()
+        .includes(q);
+
       return (
         nameMatch ||
         usesMatch ||
         dosageMatch ||
         unitMatch ||
         stripMatch ||
-        boxMatch
+        boxMatch ||
+        altArrayMatch ||
+        altSingleMatch
       );
     });
   }, [companyMedicines, activeMedicineSearch]);
@@ -190,6 +222,7 @@ export default function AdminDashboard() {
     setUses("");
     setDosage("");
     setSideEffects("");
+    setAlternativeBrands([{ name: "", company: "" }]);
   };
 
   const handleLogout = () => {
@@ -210,6 +243,7 @@ export default function AdminDashboard() {
     setUses(med.uses || "");
     setDosage(med.dosage || "");
     setSideEffects(med.sideEffects || "");
+    setAlternativeBrands(normalizeAlternativeRows(med));
     setSuccessMsg("");
     setMobileSidebarOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -279,6 +313,15 @@ export default function AdminDashboard() {
         }
       }
 
+      const cleanedAlternatives = (
+        Array.isArray(alternativeBrands) ? alternativeBrands : []
+      )
+        .map((item) => ({
+          name: String(item?.name || "").trim(),
+          company: String(item?.company || "").trim(),
+        }))
+        .filter((item) => item.name || item.company);
+
       const payload = {
         name: selectedMedicineName,
         company: selectedCompany,
@@ -289,6 +332,7 @@ export default function AdminDashboard() {
         uses,
         dosage,
         sideEffects,
+        alternativeBrands: cleanedAlternatives,
       };
 
       const url = editingId ? `/api/medicines/${editingId}` : "/api/medicines";
@@ -376,7 +420,9 @@ export default function AdminDashboard() {
                 : "1px solid rgba(248, 113, 113, 0.5)",
             width: isMobile ? "auto" : "max-content",
             minWidth: isMobile ? "0" : "310px",
-            maxWidth: isMobile ? "calc(100vw - 24px)" : "min(460px, calc(100vw - 32px))",
+            maxWidth: isMobile
+              ? "calc(100vw - 24px)"
+              : "min(460px, calc(100vw - 32px))",
             boxSizing: "border-box",
           }}
         >
@@ -443,133 +489,14 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Premium Delete Confirmation Pop-up Modal */}
-      {deleteTarget && (
-        <div
-          onClick={() => !deleting && setDeleteTarget(null)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 1900,
-            background: "rgba(15, 23, 42, 0.55)",
-            backdropFilter: "blur(6px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: isMobile ? "14px" : "20px",
-            boxSizing: "border-box",
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: "100%",
-              maxWidth: "420px",
-              boxSizing: "border-box",
-              background: "white",
-              borderRadius: isMobile ? "20px" : "24px",
-              padding: isMobile ? "20px" : "28px",
-              border: "1px solid #e2e8f0",
-              boxShadow: "0 25px 50px -12px rgba(15, 23, 42, 0.35)",
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                width: isMobile ? "48px" : "56px",
-                height: isMobile ? "48px" : "56px",
-                margin: "0 auto 14px auto",
-                borderRadius: "18px",
-                background: "#fef2f2",
-                border: "1px solid #fecaca",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: isMobile ? "21px" : "24px",
-              }}
-            >
-              🗑️
-            </div>
-
-            <h3
-              style={{
-                margin: "0 0 8px 0",
-                fontSize: isMobile ? "17.5px" : "20px",
-                fontWeight: "700",
-                color: "#0f172a",
-              }}
-            >
-              ওষুধটি ডিলিট করবেন?
-            </h3>
-
-            <p
-              style={{
-                margin: "0 0 22px 0",
-                fontSize: isMobile ? "13px" : "14px",
-                color: "#475569",
-                lineHeight: "1.6",
-                wordBreak: "break-word",
-              }}
-            >
-              আপনি{" "}
-              <strong style={{ color: "#dc2626" }}>
-                &ldquo;{deleteTarget.name}&rdquo;
-              </strong>{" "}
-              ডিলিট করতে যাচ্ছেন। এটি ডাটাবেস থেকে স্থায়ীভাবে মুছে যাবে।
-            </p>
-
-            <div
-              style={{
-                display: "flex",
-                flexDirection: isMobile ? "column-reverse" : "row",
-                gap: "10px",
-                justifyContent: "center",
-              }}
-            >
-              <button
-                type="button"
-                disabled={deleting}
-                onClick={() => setDeleteTarget(null)}
-                style={{
-                  flex: 1,
-                  padding: isMobile ? "11px 14px" : "12px 16px",
-                  borderRadius: "12px",
-                  border: "1px solid #cbd5e1",
-                  background: "#f8fafc",
-                  color: "#334155",
-                  fontWeight: "600",
-                  fontSize: "13.5px",
-                  cursor: deleting ? "not-allowed" : "pointer",
-                }}
-              >
-                বাতিল করুন
-              </button>
-
-              <button
-                type="button"
-                disabled={deleting}
-                onClick={confirmDelete}
-                style={{
-                  flex: 1,
-                  padding: isMobile ? "11px 14px" : "12px 16px",
-                  borderRadius: "12px",
-                  border: "none",
-                  background: deleting
-                    ? "#fca5a5"
-                    : "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
-                  color: "white",
-                  fontWeight: "600",
-                  fontSize: "13.5px",
-                  cursor: deleting ? "not-allowed" : "pointer",
-                  boxShadow: "0 8px 16px -4px rgba(220, 38, 38, 0.4)",
-                }}
-              >
-                {deleting ? "Deleting..." : "হ্যাঁ, ডিলিট করুন"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Confirmation Modal (Separate File) */}
+      <DeleteConfirmModal
+        deleteTarget={deleteTarget}
+        deleting={deleting}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        isMobile={isMobile}
+      />
 
       {/* Left Sidebar Component */}
       <LeftSidebar
@@ -591,7 +518,7 @@ export default function AdminDashboard() {
         handleLogout={handleLogout}
       />
 
-      {/* Right Content / Slidebar Component */}
+      {/* Right Content Component */}
       <RightContent
         emblem={renderPharmaEmblem(isMobile ? 36 : 42)}
         isMobile={isMobile}
@@ -623,6 +550,8 @@ export default function AdminDashboard() {
         setDosage={setDosage}
         sideEffects={sideEffects}
         setSideEffects={setSideEffects}
+        alternativeBrands={alternativeBrands}
+        setAlternativeBrands={setAlternativeBrands}
         uploading={uploading}
         savedMedicineQuery={savedMedicineQuery}
         setSavedMedicineQuery={setSavedMedicineQuery}

@@ -1,7 +1,14 @@
 "use client";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { initialMedicines, CompanyList } from "./data/medicines";
+import {
+  initialMedicines,
+  CompanyList,
+  CUSTOM_COMPANIES_STORAGE_KEY,
+  DELETED_COMPANIES_STORAGE_KEY,
+  getSyncedCompanies,
+  getAlternativeBrands,
+} from "./data/medicines";
 
 // ফাইলটি public ফোল্ডারের ভেতরে থাকলে নিচের পাথ কাজ করবে (যেমন: "/pharmacist-banner.png" বা "/Smiling Pharmacist Using Smartphone.png")
 const HERO_BACKGROUND_IMAGE = "/Smiling Pharmacist Using Smartphone.png";
@@ -58,6 +65,18 @@ function buildMergedMedicines(dbData) {
   return [...dbData, ...filteredInitial];
 }
 
+function readStringArrayFromStorage(key) {
+  try {
+    const raw = JSON.parse(localStorage.getItem(key) || "[]");
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [navbarSearch, setNavbarSearch] = useState("");
@@ -65,8 +84,60 @@ export default function Home() {
   const [companyMedQuery, setCompanyMedQuery] = useState("");
   const [activeCompanyMedSearch, setActiveCompanyMedSearch] = useState("");
   const [medicinesData, setMedicinesData] = useState(initialMedicines);
+  const [customCompanies, setCustomCompanies] = useState([]);
+  const [deletedCompanies, setDeletedCompanies] = useState([]);
   const [message, setMessage] = useState("");
   const [viewport, setViewport] = useState("desktop"); // "mobile" | "tablet" | "desktop"
+
+  const syncCompanyOverridesFromStorage = useCallback(() => {
+    const nextCustom = readStringArrayFromStorage(CUSTOM_COMPANIES_STORAGE_KEY);
+    const nextDeleted = readStringArrayFromStorage(
+      DELETED_COMPANIES_STORAGE_KEY
+    );
+    setCustomCompanies(nextCustom);
+    setDeletedCompanies(nextDeleted);
+  }, []);
+
+  const companiesList = useMemo(
+    () =>
+      getSyncedCompanies(
+        CompanyList,
+        medicinesData,
+        customCompanies,
+        deletedCompanies
+      ),
+    [medicinesData, customCompanies, deletedCompanies]
+  );
+
+  useEffect(() => {
+    syncCompanyOverridesFromStorage();
+
+    const handleSync = () => {
+      syncCompanyOverridesFromStorage();
+    };
+
+    window.addEventListener("companiesUpdated", handleSync);
+    window.addEventListener("storage", handleSync);
+    window.addEventListener("focus", handleSync);
+
+    return () => {
+      window.removeEventListener("companiesUpdated", handleSync);
+      window.removeEventListener("storage", handleSync);
+      window.removeEventListener("focus", handleSync);
+    };
+  }, [syncCompanyOverridesFromStorage]);
+
+  useEffect(() => {
+    if (!selectedCompany) return;
+    const stillExists = companiesList.some(
+      (comp) => comp.toLowerCase().trim() === selectedCompany.toLowerCase().trim()
+    );
+    if (!stillExists) {
+      setSelectedCompany("");
+      setCompanyMedQuery("");
+      setActiveCompanyMedSearch("");
+    }
+  }, [companiesList, selectedCompany]);
 
   useEffect(() => {
     const updateViewport = () => {
@@ -98,7 +169,6 @@ export default function Home() {
     }
   }, []);
 
-  // Navbar থেকে আসা সার্চ ভ্যালু ও রিসেট ইভেন্ট রিসিভ করা
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const urlSearch = params.get("search");
@@ -238,16 +308,33 @@ export default function Home() {
   const searchLower = effectiveSearch.toLowerCase();
   const companyQueryLower = activeCompanyMedSearch.trim().toLowerCase();
 
+  const deletedCompanySet = useMemo(
+    () =>
+      new Set(
+        deletedCompanies.map((c) => String(c || "").toLowerCase().trim())
+      ),
+    [deletedCompanies]
+  );
+
   const visibleMedicines = useMemo(() => {
+    const activeMeds = medicinesData.filter(
+      (med) =>
+        !deletedCompanySet.has(String(med?.company || "").toLowerCase().trim())
+    );
     const q = navbarSearch.trim().toLowerCase();
-    if (!q) return medicinesData;
-    return medicinesData.filter((med) => {
+    if (!q) return activeMeds;
+    return activeMeds.filter((med) => {
       const nameMatch = String(med.name || "").toLowerCase().includes(q);
       const companyMatch = String(med.company || "").toLowerCase().includes(q);
       const usesMatch = String(med.uses || "").toLowerCase().includes(q);
-      return nameMatch || companyMatch || usesMatch;
+      const altMatch = getAlternativeBrands(med).some(
+        (a) =>
+          String(a?.name || "").toLowerCase().includes(q) ||
+          String(a?.company || "").toLowerCase().includes(q)
+      );
+      return nameMatch || companyMatch || usesMatch || altMatch;
     });
-  }, [medicinesData, navbarSearch]);
+  }, [medicinesData, deletedCompanySet, navbarSearch]);
 
   const filteredMedicines = useMemo(() => {
     return visibleMedicines.filter((med) => {
@@ -255,7 +342,12 @@ export default function Home() {
         return true;
       }
       if (selectedCompany) {
-        if (med.company !== selectedCompany) return false;
+        if (
+          String(med.company || "").toLowerCase().trim() !==
+          selectedCompany.toLowerCase().trim()
+        ) {
+          return false;
+        }
         if (companyQueryLower) {
           const nameMatch = String(med.name || "")
             .toLowerCase()
@@ -266,7 +358,14 @@ export default function Home() {
           const dosageMatch = String(med.dosage || "")
             .toLowerCase()
             .includes(companyQueryLower);
-          return nameMatch || usesMatch || dosageMatch;
+          const altMatch = getAlternativeBrands(med).some(
+            (a) =>
+              String(a?.name || "").toLowerCase().includes(companyQueryLower) ||
+              String(a?.company || "")
+                .toLowerCase()
+                .includes(companyQueryLower)
+          );
+          return nameMatch || usesMatch || dosageMatch || altMatch;
         }
         return true;
       }
@@ -367,7 +466,6 @@ export default function Home() {
           />
         )}
 
-        {/* Overlay for readable text over any background image */}
         <div
           style={{
             position: "absolute",
@@ -462,7 +560,7 @@ export default function Home() {
             fontWeight: "700",
           }}
         >
-          কোম্পানি অনুযায়ী ফিল্টার করুন ({CompanyList.length} টি কোম্পানি):
+          কোম্পানি অনুযায়ী ফিল্টার করুন ({companiesList.length} টি কোম্পানি):
         </h3>
         <div
           className="filter-buttons"
@@ -487,7 +585,8 @@ export default function Home() {
           >
             🌟 সব কোম্পানি
           </button>
-          {CompanyList.map((company, index) => {
+
+          {companiesList.map((company, index) => {
             const isSearchMatched =
               searchLower.length > 0 &&
               String(company || "").toLowerCase().includes(searchLower);
@@ -496,7 +595,7 @@ export default function Home() {
             return (
               <button
                 type="button"
-                key={index}
+                key={`${company}-${index}`}
                 onClick={() => {
                   setSelectedCompany(company);
                   resetCompanyMedSearch();
@@ -527,7 +626,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Selected Company Medicine Search Bar (Shows above cards when a company is selected) */}
+      {/* Selected Company Medicine Search Bar */}
       {selectedCompany && !searchLower && (
         <div
           style={{
@@ -658,7 +757,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Responsive Grid: 2 cards on mobile, 3 on tablet, 4 on desktop */}
+      {/* Responsive Grid */}
       <div
         id="medicine-results-section"
         className="grid-container"
@@ -729,7 +828,6 @@ export default function Home() {
                         }}
                       />
 
-                      {/* Top-Left: Unit Price */}
                       {unitLabel && (
                         <span
                           style={{
@@ -754,7 +852,6 @@ export default function Home() {
                         </span>
                       )}
 
-                      {/* Top-Right: Strip Price */}
                       {stripLabel && (
                         <span
                           style={{
@@ -779,7 +876,6 @@ export default function Home() {
                         </span>
                       )}
 
-                      {/* Bottom-Right: Full Box Price */}
                       {boxLabel && (
                         <span
                           style={{
@@ -805,6 +901,7 @@ export default function Home() {
                       )}
                     </div>
                   )}
+
                   <h3
                     style={{
                       margin: "0 0 4px 0",
@@ -818,6 +915,7 @@ export default function Home() {
                   >
                     {med.name}
                   </h3>
+
                   <p
                     style={{
                       margin: 0,
@@ -860,7 +958,6 @@ export default function Home() {
                     ডিটেইলস দেখুন <span>→</span>
                   </span>
 
-                  {/* Premium Original "নাই? সিলেক্ট করুন" Button */}
                   <button
                     type="button"
                     onClick={(e) => handleAddToNotification(e, med)}

@@ -1,4 +1,8 @@
 "use client";
+import { useState, useEffect } from "react";
+
+const CUSTOM_COMPANIES_STORAGE_KEY = "sheikhDrugsCustomCompanies";
+const DELETED_COMPANIES_STORAGE_KEY = "sheikhDrugsDeletedCompanies";
 
 export default function LeftSidebar({
   emblem,
@@ -20,9 +24,184 @@ export default function LeftSidebar({
 }) {
   const sidebarWidth = isTablet ? 265 : 315;
 
+  const [customCompanies, setCustomCompanies] = useState([]);
+  const [deletedCompanies, setDeletedCompanies] = useState([]);
+  const [showAddCompanyInput, setShowAddCompanyInput] = useState(false);
+  const [newCompanyName, setNewCompanyName] = useState("");
+  const [companyError, setCompanyError] = useState("");
+  const [pendingDeleteCompany, setPendingDeleteCompany] = useState("");
+
+  useEffect(() => {
+    try {
+      const savedCustom = JSON.parse(
+        localStorage.getItem(CUSTOM_COMPANIES_STORAGE_KEY) || "[]"
+      );
+      if (Array.isArray(savedCustom)) {
+        setCustomCompanies(
+          savedCustom.filter((c) => typeof c === "string" && c.trim())
+        );
+      }
+
+      const savedDeleted = JSON.parse(
+        localStorage.getItem(DELETED_COMPANIES_STORAGE_KEY) || "[]"
+      );
+      if (Array.isArray(savedDeleted)) {
+        setDeletedCompanies(
+          savedDeleted.filter((c) => typeof c === "string" && c.trim())
+        );
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
+
+  const deletedSet = new Set(
+    deletedCompanies.map((c) => c.toLowerCase().trim())
+  );
+
+  const combinedCompanies = (() => {
+    const baseList = (
+      Array.isArray(filteredCompanies) ? filteredCompanies : []
+    ).filter((comp) => !deletedSet.has(String(comp).toLowerCase().trim()));
+
+    const q = String(searchTerm || "").trim().toLowerCase();
+    const matchedCustom = customCompanies.filter(
+      (comp) =>
+        !deletedSet.has(comp.toLowerCase().trim()) &&
+        !baseList.some(
+          (existing) =>
+            existing.toLowerCase().trim() === comp.toLowerCase().trim()
+        ) &&
+        (!q || comp.toLowerCase().includes(q))
+    );
+
+    return [...matchedCustom, ...baseList];
+  })();
+
+  const handleSelectCompany = (comp) => {
+    setSelectedCompany(comp);
+    if (typeof setSavedMedicineQuery === "function") {
+      setSavedMedicineQuery("");
+    }
+    if (typeof setActiveMedicineSearch === "function") {
+      setActiveMedicineSearch("");
+    }
+    if (!editingId && typeof setSelectedMedicineName === "function") {
+      setSelectedMedicineName("");
+    }
+    if (isMobile && typeof setMobileSidebarOpen === "function") {
+      setMobileSidebarOpen(false);
+    }
+  };
+
+  const handleRequestDeleteCompany = (e, compToDelete) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setPendingDeleteCompany(compToDelete);
+  };
+
+  const handleConfirmDeleteCompany = () => {
+    const compToDelete = pendingDeleteCompany;
+    if (!compToDelete) return;
+
+    const normalized = String(compToDelete).toLowerCase().trim();
+    const updatedCustom = customCompanies.filter(
+      (c) => c.toLowerCase().trim() !== normalized
+    );
+    setCustomCompanies(updatedCustom);
+
+    const updatedDeleted = deletedCompanies.some(
+      (c) => c.toLowerCase().trim() === normalized
+    )
+      ? deletedCompanies
+      : [...deletedCompanies, compToDelete];
+    setDeletedCompanies(updatedDeleted);
+
+    try {
+      localStorage.setItem(
+        CUSTOM_COMPANIES_STORAGE_KEY,
+        JSON.stringify(updatedCustom)
+      );
+      localStorage.setItem(
+        DELETED_COMPANIES_STORAGE_KEY,
+        JSON.stringify(updatedDeleted)
+      );
+      window.dispatchEvent(new Event("companiesUpdated"));
+    } catch {
+      // ignore storage quota errors
+    }
+
+    const remaining = combinedCompanies.filter(
+      (c) => c.toLowerCase().trim() !== normalized
+    );
+
+    if (selectedCompany === compToDelete) {
+      const nextComp =
+        remaining[0] ||
+        (Array.isArray(medicines) && medicines[0]?.company) ||
+        "";
+      setSelectedCompany(nextComp);
+      if (typeof setSavedMedicineQuery === "function") {
+        setSavedMedicineQuery("");
+      }
+      if (typeof setActiveMedicineSearch === "function") {
+        setActiveMedicineSearch("");
+      }
+    }
+
+    setPendingDeleteCompany("");
+  };
+
+  const handleAddCompany = (e) => {
+    if (e) e.preventDefault();
+    const trimmed = newCompanyName.trim();
+    if (!trimmed) {
+      setCompanyError("কোম্পানির নাম লিখুন");
+      return;
+    }
+
+    const normalized = trimmed.toLowerCase();
+    const nextDeleted = deletedCompanies.filter(
+      (c) => c.toLowerCase().trim() !== normalized
+    );
+    setDeletedCompanies(nextDeleted);
+
+    const allExisting = [
+      ...(Array.isArray(filteredCompanies) ? filteredCompanies : []),
+      ...customCompanies,
+    ];
+    const alreadyExists = allExisting.find(
+      (item) => item.toLowerCase().trim() === normalized
+    );
+
+    const updatedCustom = alreadyExists
+      ? customCompanies
+      : [trimmed, ...customCompanies];
+    setCustomCompanies(updatedCustom);
+
+    try {
+      localStorage.setItem(
+        CUSTOM_COMPANIES_STORAGE_KEY,
+        JSON.stringify(updatedCustom)
+      );
+      localStorage.setItem(
+        DELETED_COMPANIES_STORAGE_KEY,
+        JSON.stringify(nextDeleted)
+      );
+      window.dispatchEvent(new Event("companiesUpdated"));
+    } catch {
+      // ignore storage quota errors
+    }
+
+    setNewCompanyName("");
+    setCompanyError("");
+    setShowAddCompanyInput(false);
+    handleSelectCompany(alreadyExists || trimmed);
+  };
+
   const handleBrandClick = () => {
     const defaultCompany =
-      (Array.isArray(filteredCompanies) && filteredCompanies[0]) ||
+      combinedCompanies[0] ||
       (Array.isArray(medicines) && medicines[0]?.company) ||
       selectedCompany ||
       "";
@@ -209,6 +388,131 @@ export default function LeftSidebar({
         )}
       </div>
 
+      {/* Company List Header + Plus Button */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          margin: "2px 0 6px 0",
+          paddingBottom: "4px",
+          borderBottom: "1px solid #f1f5f9",
+          flexShrink: 0,
+        }}
+      >
+        <p
+          style={{
+            fontSize: "11.5px",
+            fontWeight: "700",
+            color: "#64748b",
+            margin: 0,
+            letterSpacing: "0.03em",
+          }}
+        >
+          COMPANIES ({combinedCompanies.length})
+        </p>
+
+        <button
+          type="button"
+          onClick={() => {
+            setShowAddCompanyInput((prev) => !prev);
+            setCompanyError("");
+          }}
+          title="Add new company"
+          aria-label="Add new company"
+          style={{
+            width: "26px",
+            height: "26px",
+            borderRadius: "8px",
+            border: "1px solid #bfdbfe",
+            background: showAddCompanyInput
+              ? "#2563eb"
+              : "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
+            color: showAddCompanyInput ? "#ffffff" : "#1d4ed8",
+            fontSize: "16px",
+            fontWeight: "800",
+            lineHeight: 1,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            transition: "all 0.15s ease",
+            flexShrink: 0,
+          }}
+        >
+          {showAddCompanyInput ? "−" : "+"}
+        </button>
+      </div>
+
+      {/* Add Company Input Box (Opens when + is clicked) */}
+      {showAddCompanyInput && (
+        <form
+          onSubmit={handleAddCompany}
+          style={{
+            marginBottom: "10px",
+            padding: "10px",
+            borderRadius: "12px",
+            background: "#f8fafc",
+            border: "1px solid #cbd5e1",
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: "flex", gap: "6px" }}>
+            <input
+              type="text"
+              value={newCompanyName}
+              onChange={(e) => {
+                setNewCompanyName(e.target.value);
+                if (companyError) setCompanyError("");
+              }}
+              placeholder="নতুন কোম্পানির নাম..."
+              autoFocus
+              style={{
+                flex: 1,
+                minWidth: 0,
+                padding: "8px 10px",
+                borderRadius: "9px",
+                border: "1px solid #cbd5e1",
+                background: "#ffffff",
+                outline: "none",
+                fontSize: "12.5px",
+                color: "#0f172a",
+                boxSizing: "border-box",
+              }}
+            />
+            <button
+              type="submit"
+              style={{
+                padding: "8px 12px",
+                borderRadius: "9px",
+                border: "none",
+                background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+                color: "#ffffff",
+                fontSize: "12px",
+                fontWeight: "700",
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+                flexShrink: 0,
+              }}
+            >
+              Add
+            </button>
+          </div>
+          {companyError && (
+            <div
+              style={{
+                marginTop: "5px",
+                fontSize: "11px",
+                fontWeight: "600",
+                color: "#dc2626",
+              }}
+            >
+              {companyError}
+            </div>
+          )}
+        </form>
+      )}
+
       {/* Company List (Scrollable inside fixed sidebar) */}
       <div
         style={{
@@ -222,83 +526,107 @@ export default function LeftSidebar({
           paddingRight: "2px",
         }}
       >
-        <p
-          style={{
-            fontSize: "11.5px",
-            fontWeight: "700",
-            color: "#64748b",
-            margin: "2px 0 6px 0",
-            letterSpacing: "0.03em",
-            position: "sticky",
-            top: 0,
-            background: "#ffffff",
-            paddingBottom: "4px",
-            zIndex: 2,
-          }}
-        >
-          COMPANIES ({filteredCompanies.length})
-        </p>
-        {filteredCompanies.map((comp, index) => {
+        {combinedCompanies.map((comp, index) => {
           const isActive = selectedCompany === comp;
           const countForComp = medicines.filter(
             (m) => m.company === comp
           ).length;
 
           return (
-            <button
-              type="button"
-              key={index}
-              onClick={() => {
-                setSelectedCompany(comp);
-                setSavedMedicineQuery("");
-                setActiveMedicineSearch("");
-                if (!editingId) {
-                  setSelectedMedicineName("");
-                }
-                if (isMobile) {
-                  setMobileSidebarOpen(false);
-                }
-              }}
+            <div
+              key={`${comp}-${index}`}
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                gap: "8px",
-                textAlign: "left",
-                padding: "9px 11px",
+                gap: "4px",
+                padding: "4px 6px 4px 4px",
                 borderRadius: "10px",
                 border: isActive ? "1px solid #bfdbfe" : "1px solid transparent",
                 background: isActive
                   ? "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)"
                   : "transparent",
-                color: isActive ? "#1d4ed8" : "#334155",
-                fontWeight: isActive ? "700" : "500",
-                cursor: "pointer",
-                fontSize: "12.5px",
                 transition: "all 0.15s ease",
-                lineHeight: "1.35",
                 flexShrink: 0,
               }}
             >
-              <span style={{ minWidth: 0, wordBreak: "break-word" }}>
-                🏢 {comp}
-              </span>
-              {countForComp > 0 && (
-                <span
-                  style={{
-                    fontSize: "11px",
-                    fontWeight: "700",
-                    padding: "2px 7px",
-                    borderRadius: "999px",
-                    background: isActive ? "#2563eb" : "#e2e8f0",
-                    color: isActive ? "#ffffff" : "#475569",
-                    flexShrink: 0,
-                  }}
-                >
-                  {countForComp}
+              <button
+                type="button"
+                onClick={() => handleSelectCompany(comp)}
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "8px",
+                  textAlign: "left",
+                  padding: "5px 6px",
+                  borderRadius: "8px",
+                  border: "none",
+                  background: "transparent",
+                  color: isActive ? "#1d4ed8" : "#334155",
+                  fontWeight: isActive ? "700" : "500",
+                  cursor: "pointer",
+                  fontSize: "12.5px",
+                  lineHeight: "1.35",
+                }}
+              >
+                <span style={{ minWidth: 0, wordBreak: "break-word" }}>
+                  🏢 {comp}
                 </span>
-              )}
-            </button>
+                {countForComp > 0 && (
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: "700",
+                      padding: "2px 7px",
+                      borderRadius: "999px",
+                      background: isActive ? "#2563eb" : "#e2e8f0",
+                      color: isActive ? "#ffffff" : "#475569",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {countForComp}
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={(e) => handleRequestDeleteCompany(e, comp)}
+                title={`Delete ${comp}`}
+                aria-label={`Delete ${comp}`}
+                style={{
+                  width: "24px",
+                  height: "24px",
+                  borderRadius: "7px",
+                  border: "1px solid transparent",
+                  background: "transparent",
+                  color: "#94a3b8",
+                  fontSize: "12px",
+                  fontWeight: "700",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  flexShrink: 0,
+                  transition: "all 0.15s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#fee2e2";
+                  e.currentTarget.style.color = "#dc2626";
+                  e.currentTarget.style.borderColor = "#fca5a5";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.color = "#94a3b8";
+                  e.currentTarget.style.borderColor = "transparent";
+                }}
+              >
+                ✕
+              </button>
+            </div>
           );
         })}
       </div>
@@ -307,6 +635,131 @@ export default function LeftSidebar({
 
   return (
     <>
+      {/* Top Confirm Pop-up Notification when ✕ is clicked */}
+      {pendingDeleteCompany && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Confirm delete company"
+          style={{
+            position: "fixed",
+            top: "18px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 2600,
+            width: "min(440px, calc(100vw - 24px))",
+            background: "#0f172a",
+            color: "#ffffff",
+            border: "1px solid rgba(248, 113, 113, 0.55)",
+            borderRadius: "16px",
+            padding: "14px 16px",
+            boxShadow:
+              "0 20px 35px -8px rgba(15, 23, 42, 0.45), 0 8px 16px -6px rgba(220, 38, 38, 0.25)",
+            boxSizing: "border-box",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              gap: "10px",
+            }}
+          >
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: "11px",
+                  fontWeight: "800",
+                  letterSpacing: "0.05em",
+                  textTransform: "uppercase",
+                  color: "#fca5a5",
+                  marginBottom: "4px",
+                }}
+              >
+                Confirm Delete
+              </div>
+              <div
+                style={{
+                  fontSize: "13px",
+                  lineHeight: "1.45",
+                  color: "#f8fafc",
+                  wordBreak: "break-word",
+                }}
+              >
+                আপনি কি{" "}
+                <strong style={{ color: "#f87171" }}>
+                  &ldquo;{pendingDeleteCompany}&rdquo;
+                </strong>{" "}
+                কোম্পানিটি ডিলিট করতে চান?
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setPendingDeleteCompany("")}
+              aria-label="Close delete confirmation"
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "#94a3b8",
+                fontSize: "14px",
+                fontWeight: "700",
+                cursor: "pointer",
+                padding: "2px 6px",
+                flexShrink: 0,
+              }}
+            >
+              ✕
+            </button>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: "8px",
+              marginTop: "12px",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setPendingDeleteCompany("")}
+              style={{
+                padding: "7px 12px",
+                borderRadius: "10px",
+                border: "1px solid #475569",
+                background: "#1e293b",
+                color: "#e2e8f0",
+                fontSize: "12px",
+                fontWeight: "700",
+                cursor: "pointer",
+              }}
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              onClick={handleConfirmDeleteCompany}
+              style={{
+                padding: "7px 14px",
+                borderRadius: "10px",
+                border: "none",
+                background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+                color: "#ffffff",
+                fontSize: "12px",
+                fontWeight: "700",
+                cursor: "pointer",
+                boxShadow: "0 6px 14px -4px rgba(220, 38, 38, 0.55)",
+              }}
+            >
+              Confirm
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Mobile Top Bar */}
       {isMobile && (
         <div
