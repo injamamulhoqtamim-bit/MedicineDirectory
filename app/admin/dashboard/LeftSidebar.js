@@ -1,8 +1,21 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const CUSTOM_COMPANIES_STORAGE_KEY = "sheikhDrugsCustomCompanies";
 const DELETED_COMPANIES_STORAGE_KEY = "sheikhDrugsDeletedCompanies";
+
+function readStringArray(key) {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = JSON.parse(localStorage.getItem(key) || "[]");
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
 
 export default function LeftSidebar({
   emblem,
@@ -31,52 +44,67 @@ export default function LeftSidebar({
   const [companyError, setCompanyError] = useState("");
   const [pendingDeleteCompany, setPendingDeleteCompany] = useState("");
 
-  useEffect(() => {
-    try {
-      const savedCustom = JSON.parse(
-        localStorage.getItem(CUSTOM_COMPANIES_STORAGE_KEY) || "[]"
-      );
-      if (Array.isArray(savedCustom)) {
-        setCustomCompanies(
-          savedCustom.filter((c) => typeof c === "string" && c.trim())
-        );
-      }
-
-      const savedDeleted = JSON.parse(
-        localStorage.getItem(DELETED_COMPANIES_STORAGE_KEY) || "[]"
-      );
-      if (Array.isArray(savedDeleted)) {
-        setDeletedCompanies(
-          savedDeleted.filter((c) => typeof c === "string" && c.trim())
-        );
-      }
-    } catch {
-      // ignore storage errors
-    }
+  const syncFromStorage = useCallback(() => {
+    setCustomCompanies(readStringArray(CUSTOM_COMPANIES_STORAGE_KEY));
+    setDeletedCompanies(readStringArray(DELETED_COMPANIES_STORAGE_KEY));
   }, []);
+
+  useEffect(() => {
+    syncFromStorage();
+    window.addEventListener("companiesUpdated", syncFromStorage);
+    window.addEventListener("storage", syncFromStorage);
+    return () => {
+      window.removeEventListener("companiesUpdated", syncFromStorage);
+      window.removeEventListener("storage", syncFromStorage);
+    };
+  }, [syncFromStorage]);
 
   const deletedSet = new Set(
     deletedCompanies.map((c) => c.toLowerCase().trim())
   );
 
   const combinedCompanies = (() => {
-    const baseList = (
-      Array.isArray(filteredCompanies) ? filteredCompanies : []
-    ).filter((comp) => !deletedSet.has(String(comp).toLowerCase().trim()));
-
     const q = String(searchTerm || "").trim().toLowerCase();
-    const matchedCustom = customCompanies.filter(
-      (comp) =>
-        !deletedSet.has(comp.toLowerCase().trim()) &&
-        !baseList.some(
-          (existing) =>
-            existing.toLowerCase().trim() === comp.toLowerCase().trim()
-        ) &&
-        (!q || comp.toLowerCase().includes(q))
-    );
+    const seen = new Set();
+    const result = [];
 
-    return [...matchedCustom, ...baseList];
+    const addIfValid = (rawComp) => {
+      const comp = String(rawComp || "").trim();
+      if (!comp) return;
+      const key = comp.toLowerCase();
+      if (deletedSet.has(key) || seen.has(key)) return;
+      if (q && !key.includes(q)) return;
+      seen.add(key);
+      result.push(comp);
+    };
+
+    // 1. Admin থেকে যুক্ত করা custom কোম্পানিগুলো সবার আগে
+    for (const comp of customCompanies) {
+      addIfValid(comp);
+    }
+
+    // 2. Parent থেকে আসা filteredCompanies
+    if (Array.isArray(filteredCompanies)) {
+      for (const comp of filteredCompanies) {
+        addIfValid(comp);
+      }
+    }
+
+    // 3. ডাটাবেসের ওষুধের কোম্পানিগুলো
+    if (Array.isArray(medicines)) {
+      for (const med of medicines) {
+        addIfValid(med?.company);
+      }
+    }
+
+    return result;
   })();
+
+  useEffect(() => {
+    if (!selectedCompany && combinedCompanies.length > 0) {
+      setSelectedCompany(combinedCompanies[0]);
+    }
+  }, [selectedCompany, combinedCompanies, setSelectedCompany]);
 
   const handleSelectCompany = (comp) => {
     setSelectedCompany(comp);
@@ -526,109 +554,130 @@ export default function LeftSidebar({
           paddingRight: "2px",
         }}
       >
-        {combinedCompanies.map((comp, index) => {
-          const isActive = selectedCompany === comp;
-          const countForComp = medicines.filter(
-            (m) => m.company === comp
-          ).length;
+        {combinedCompanies.length === 0 ? (
+          <div
+            style={{
+              padding: "16px 12px",
+              borderRadius: "12px",
+              background: "#f8fafc",
+              border: "1px dashed #cbd5e1",
+              textAlign: "center",
+              fontSize: "12px",
+              color: "#64748b",
+              lineHeight: "1.5",
+            }}
+          >
+            কোনো কোম্পানি যোগ করা হয়নি। উপরে{" "}
+            <strong style={{ color: "#1d4ed8" }}>+</strong> বাটনে ক্লিক করে
+            কোম্পানি যুক্ত করুন।
+          </div>
+        ) : (
+          combinedCompanies.map((comp, index) => {
+            const isActive = selectedCompany === comp;
+            const countForComp = Array.isArray(medicines)
+              ? medicines.filter((m) => m.company === comp).length
+              : 0;
 
-          return (
-            <div
-              key={`${comp}-${index}`}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: "4px",
-                padding: "4px 6px 4px 4px",
-                borderRadius: "10px",
-                border: isActive ? "1px solid #bfdbfe" : "1px solid transparent",
-                background: isActive
-                  ? "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)"
-                  : "transparent",
-                transition: "all 0.15s ease",
-                flexShrink: 0,
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => handleSelectCompany(comp)}
+            return (
+              <div
+                key={`${comp}-${index}`}
                 style={{
-                  flex: 1,
-                  minWidth: 0,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  gap: "8px",
-                  textAlign: "left",
-                  padding: "5px 6px",
-                  borderRadius: "8px",
-                  border: "none",
-                  background: "transparent",
-                  color: isActive ? "#1d4ed8" : "#334155",
-                  fontWeight: isActive ? "700" : "500",
-                  cursor: "pointer",
-                  fontSize: "12.5px",
-                  lineHeight: "1.35",
-                }}
-              >
-                <span style={{ minWidth: 0, wordBreak: "break-word" }}>
-                  🏢 {comp}
-                </span>
-                {countForComp > 0 && (
-                  <span
-                    style={{
-                      fontSize: "11px",
-                      fontWeight: "700",
-                      padding: "2px 7px",
-                      borderRadius: "999px",
-                      background: isActive ? "#2563eb" : "#e2e8f0",
-                      color: isActive ? "#ffffff" : "#475569",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {countForComp}
-                  </span>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={(e) => handleRequestDeleteCompany(e, comp)}
-                title={`Delete ${comp}`}
-                aria-label={`Delete ${comp}`}
-                style={{
-                  width: "24px",
-                  height: "24px",
-                  borderRadius: "7px",
-                  border: "1px solid transparent",
-                  background: "transparent",
-                  color: "#94a3b8",
-                  fontSize: "12px",
-                  fontWeight: "700",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  flexShrink: 0,
+                  gap: "4px",
+                  padding: "4px 6px 4px 4px",
+                  borderRadius: "10px",
+                  border: isActive
+                    ? "1px solid #bfdbfe"
+                    : "1px solid transparent",
+                  background: isActive
+                    ? "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)"
+                    : "transparent",
                   transition: "all 0.15s ease",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "#fee2e2";
-                  e.currentTarget.style.color = "#dc2626";
-                  e.currentTarget.style.borderColor = "#fca5a5";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "transparent";
-                  e.currentTarget.style.color = "#94a3b8";
-                  e.currentTarget.style.borderColor = "transparent";
+                  flexShrink: 0,
                 }}
               >
-                ✕
-              </button>
-            </div>
-          );
-        })}
+                <button
+                  type="button"
+                  onClick={() => handleSelectCompany(comp)}
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "8px",
+                    textAlign: "left",
+                    padding: "5px 6px",
+                    borderRadius: "8px",
+                    border: "none",
+                    background: "transparent",
+                    color: isActive ? "#1d4ed8" : "#334155",
+                    fontWeight: isActive ? "700" : "500",
+                    cursor: "pointer",
+                    fontSize: "12.5px",
+                    lineHeight: "1.35",
+                  }}
+                >
+                  <span style={{ minWidth: 0, wordBreak: "break-word" }}>
+                    🏢 {comp}
+                  </span>
+                  {countForComp > 0 && (
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        fontWeight: "700",
+                        padding: "2px 7px",
+                        borderRadius: "999px",
+                        background: isActive ? "#2563eb" : "#e2e8f0",
+                        color: isActive ? "#ffffff" : "#475569",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {countForComp}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => handleRequestDeleteCompany(e, comp)}
+                  title={`Delete ${comp}`}
+                  aria-label={`Delete ${comp}`}
+                  style={{
+                    width: "24px",
+                    height: "24px",
+                    borderRadius: "7px",
+                    border: "1px solid transparent",
+                    background: "transparent",
+                    color: "#94a3b8",
+                    fontSize: "12px",
+                    fontWeight: "700",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    flexShrink: 0,
+                    transition: "all 0.15s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "#fee2e2";
+                    e.currentTarget.style.color = "#dc2626";
+                    e.currentTarget.style.borderColor = "#fca5a5";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.color = "#94a3b8";
+                    e.currentTarget.style.borderColor = "transparent";
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            );
+          })
+        )}
       </div>
     </>
   );

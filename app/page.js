@@ -78,6 +78,7 @@ function readStringArrayFromStorage(key) {
 }
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [navbarSearch, setNavbarSearch] = useState("");
   const [selectedCompany, setSelectedCompany] = useState("");
@@ -88,6 +89,10 @@ export default function Home() {
   const [deletedCompanies, setDeletedCompanies] = useState([]);
   const [message, setMessage] = useState("");
   const [viewport, setViewport] = useState("desktop"); // "mobile" | "tablet" | "desktop"
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const syncCompanyOverridesFromStorage = useCallback(() => {
     const nextCustom = readStringArrayFromStorage(CUSTOM_COMPANIES_STORAGE_KEY);
@@ -560,7 +565,8 @@ export default function Home() {
             fontWeight: "700",
           }}
         >
-          কোম্পানি অনুযায়ী ফিল্টার করুন ({companiesList.length} টি কোম্পানি):
+          কোম্পানি অনুযায়ী ফিল্টার করুন ({mounted ? companiesList.length : 0} টি
+          কোম্পানি):
         </h3>
         <div
           className="filter-buttons"
@@ -586,43 +592,44 @@ export default function Home() {
             🌟 সব কোম্পানি
           </button>
 
-          {companiesList.map((company, index) => {
-            const isSearchMatched =
-              searchLower.length > 0 &&
-              String(company || "").toLowerCase().includes(searchLower);
-            const isSelected = selectedCompany === company;
+          {mounted &&
+            companiesList.map((company, index) => {
+              const isSearchMatched =
+                searchLower.length > 0 &&
+                String(company || "").toLowerCase().includes(searchLower);
+              const isSelected = selectedCompany === company;
 
-            return (
-              <button
-                type="button"
-                key={`${company}-${index}`}
-                onClick={() => {
-                  setSelectedCompany(company);
-                  resetCompanyMedSearch();
-                  syncSearchToNavbar("");
-                }}
-                className={`filter-btn ${isSelected ? "active" : ""}`}
-                style={{
-                  fontSize: isMobile ? "11.5px" : "13.5px",
-                  padding: isMobile ? "6px 10px" : "8px 14px",
-                  maxWidth: "100%",
-                  ...(isSearchMatched
-                    ? {
-                        backgroundColor: "#dc2626",
-                        color: "#ffffff",
-                        borderColor: "#dc2626",
-                        fontWeight: "700",
-                        boxShadow: "0 4px 10px rgba(220, 38, 38, 0.25)",
-                      }
-                    : {
-                        backgroundColor: isSelected ? undefined : "#ffffff",
-                      }),
-                }}
-              >
-                {company}
-              </button>
-            );
-          })}
+              return (
+                <button
+                  type="button"
+                  key={`${company}-${index}`}
+                  onClick={() => {
+                    setSelectedCompany(company);
+                    resetCompanyMedSearch();
+                    syncSearchToNavbar("");
+                  }}
+                  className={`filter-btn ${isSelected ? "active" : ""}`}
+                  style={{
+                    fontSize: isMobile ? "11.5px" : "13.5px",
+                    padding: isMobile ? "6px 10px" : "8px 14px",
+                    maxWidth: "100%",
+                    ...(isSearchMatched
+                      ? {
+                          backgroundColor: "#dc2626",
+                          color: "#ffffff",
+                          borderColor: "#dc2626",
+                          fontWeight: "700",
+                          boxShadow: "0 4px 10px rgba(220, 38, 38, 0.25)",
+                        }
+                      : {
+                          backgroundColor: isSelected ? undefined : "#ffffff",
+                        }),
+                  }}
+                >
+                  {company}
+                </button>
+              );
+            })}
         </div>
       </div>
 

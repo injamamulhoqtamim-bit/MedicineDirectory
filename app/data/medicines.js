@@ -1,69 +1,9 @@
-const bangladeshMedicineCompanies = [
-  "Square Pharmaceuticals Ltd.",
-  "Incepta Pharmaceuticals Ltd.",
-  "Beximco Pharmaceuticals Ltd.",
-  "Renata PLC",
-  "The ACME Laboratories Ltd.",
-  "ACI Pharmaceuticals",
-  "Aristopharma Ltd.",
-  "Opsonin Pharma Ltd.",
-  "Healthcare Pharmaceuticals Ltd.",
-  "Eskayef Pharmaceuticals Ltd. (SK+F)",
-  "Popular Pharmaceuticals Ltd.",
-  "Drug International Ltd.",
-  "Ibn Sina Pharmaceutical Industry Ltd.",
-  "Beacon Pharmaceuticals PLC",
-  "Orion Pharma Ltd.",
-  "Radiant Pharmaceuticals Ltd.",
-  "General Pharmaceuticals Ltd.",
-  "Nuvista Pharma Ltd.",
-  "Sanofi Bangladesh Ltd.",
-  "Novartis (Bangladesh) Ltd.",
-  "GlaxoSmithKline (GSK) Bangladesh",
-  "Roche Bangladesh Ltd.",
-  "Servier Bangladesh Operations",
-  "Novo Nordisk Pharma (Pvt.) Ltd.",
-  "Ziska Pharmaceuticals Ltd.",
-  "Kemiko Pharmaceuticals Ltd.",
-  "Silva Pharmaceuticals Ltd.",
-  "Albion Laboratories Ltd.",
-  "Amico Laboratories Ltd.",
-  "Astra Biopharmaceuticals Ltd.",
-  "Benham Pharmaceuticals Ltd.",
-  "Biopharma Ltd.",
-  "Bristol Pharma Bangladesh Ltd.",
-  "Central Pharmaceutical Ltd.",
-  "Chemist Laboratories Ltd.",
-  "Cosmic Pharma Ltd.",
-  "Decent Pharma Laboratories Ltd.",
-  "Delta Pharma Ltd.",
-  "Edruc Ltd.",
-  "Eon Pharmaceuticals Ltd.",
-  "Everest Pharmaceuticals Ltd.",
-  "Fisons Bangladesh Ltd.",
-  "Gaco Pharmaceuticals Ltd.",
-  "Globe Pharmaceuticals Ltd.",
-  "Gonoshasthaya Antibiotic Ltd.",
-  "Guardian Healthcare Ltd.",
-  "Hudson Pharmaceuticals Ltd.",
-  "Jayson Pharmaceuticals Ltd.",
-  "Labaid Pharmaceuticals Ltd.",
-  "Libra Pharmaceuticals Ltd."
-];
-
 export const CUSTOM_COMPANIES_STORAGE_KEY = "sheikhDrugsCustomCompanies";
 export const DELETED_COMPANIES_STORAGE_KEY = "sheikhDrugsDeletedCompanies";
 
-export const CompanyList = Array.from(
-  new Set(
-    bangladeshMedicineCompanies
-      .map((name) => String(name || "").trim())
-      .filter(Boolean)
-  )
-);
+// শুরুতে কোনো হার্ডকোডেড ৫০টি কোম্পানি থাকবে না
+export const CompanyList = [];
 
-// SSR & First Client render hydration-safe helper:
-// Passes customList & deletedList explicitly from client state after mount.
 export function getSyncedCompanies(
   baseList = CompanyList,
   medicinesData = [],
@@ -82,10 +22,11 @@ export function getSyncedCompanies(
         .filter(Boolean)
     : [];
 
+  // শুধুমাত্র অ্যাডমিন থেকে যুক্ত করা কোম্পানি ও ডাটাবেসের ওষুধের কোম্পানি নেওয়া হবে
   const merged = [
     ...(Array.isArray(customList) ? customList : []),
-    ...(Array.isArray(baseList) ? baseList : []),
     ...dbCompanies,
+    ...(Array.isArray(baseList) ? baseList : []),
   ];
 
   const seen = new Set();
@@ -109,7 +50,6 @@ export function broadcastCompaniesUpdate() {
   }
 }
 
-// Helper to normalize alternative brands for frontend display
 export function getAlternativeBrands(medicine) {
   if (
     Array.isArray(medicine?.alternativeBrands) &&
@@ -138,11 +78,8 @@ export function getAlternativeBrands(medicine) {
   return [];
 }
 
-// ডাটাবেস থেকে লাইভ ডেটা লোড হওয়ায় initialMedicines খালি রাখা হয়েছে,
-// যাতে অ্যাডমিন থেকে ডিলিট করলে পুরনো স্ট্যাটিক আইটেম আর ফ্রন্টএন্ডে না দেখায়।
 export const initialMedicines = [];
 
-// Helper to get all medicines
 export function getMedicines() {
   return initialMedicines;
 }
