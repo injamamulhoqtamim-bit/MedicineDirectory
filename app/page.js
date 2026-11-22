@@ -312,6 +312,9 @@ export default function Home() {
   const effectiveSearch = String(navbarSearch || searchTerm || "").trim();
   const searchLower = effectiveSearch.toLowerCase();
   const companyQueryLower = activeCompanyMedSearch.trim().toLowerCase();
+  const hasActiveFilter = Boolean(
+    searchLower || selectedCompany || companyQueryLower
+  );
 
   const deletedCompanySet = useMemo(
     () =>
@@ -765,285 +768,287 @@ export default function Home() {
       )}
 
       {/* Responsive Grid */}
-      <div
-        id="medicine-results-section"
-        className="grid-container"
-        style={{
-          display: "grid",
-          gridTemplateColumns: isMobile
-            ? "repeat(2, minmax(0, 1fr))"
-            : isTablet
-            ? "repeat(3, minmax(0, 1fr))"
-            : "repeat(4, minmax(0, 1fr))",
-          gap: isMobile ? "10px" : isTablet ? "14px" : "18px",
-          marginTop: isMobile ? "14px" : "22px",
-          width: "100%",
-          boxSizing: "border-box",
-        }}
-      >
-        {filteredMedicines.length > 0 ? (
-          filteredMedicines.map((med) => {
-            const uniqueId = med._id || med.id;
-            const unitLabel = formatPriceLabel(med.unitPrice);
-            const stripLabel = formatPriceLabel(med.stripPrice);
-            const boxLabel = formatPriceLabel(med.boxPrice);
+      {(filteredMedicines.length > 0 || hasActiveFilter) && (
+        <div
+          id="medicine-results-section"
+          className="grid-container"
+          style={{
+            display: "grid",
+            gridTemplateColumns: isMobile
+              ? "repeat(2, minmax(0, 1fr))"
+              : isTablet
+              ? "repeat(3, minmax(0, 1fr))"
+              : "repeat(4, minmax(0, 1fr))",
+            gap: isMobile ? "10px" : isTablet ? "14px" : "18px",
+            marginTop: isMobile ? "14px" : "22px",
+            width: "100%",
+            boxSizing: "border-box",
+          }}
+        >
+          {filteredMedicines.length > 0 ? (
+            filteredMedicines.map((med) => {
+              const uniqueId = med._id || med.id;
+              const unitLabel = formatPriceLabel(med.unitPrice);
+              const stripLabel = formatPriceLabel(med.stripPrice);
+              const boxLabel = formatPriceLabel(med.boxPrice);
 
-            return (
-              <Link
-                key={uniqueId}
-                href={`/medicine/${uniqueId}`}
-                prefetch={true}
-                onMouseEnter={() => primeMedicineInCache(med)}
-                onTouchStart={() => primeMedicineInCache(med)}
-                onClick={() => primeMedicineInCache(med)}
-                className="card"
-                style={{
-                  padding: isMobile ? "10px" : isTablet ? "13px" : "16px",
-                  borderRadius: isMobile ? "13px" : "18px",
-                  boxSizing: "border-box",
-                  minWidth: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div style={{ minWidth: 0 }}>
-                  {med.image && (
-                    <div
-                      style={{
-                        position: "relative",
-                        width: "100%",
-                        height: isMobile ? "104px" : isTablet ? "128px" : "150px",
-                        overflow: "hidden",
-                        borderRadius: isMobile ? "9px" : "12px",
-                        background: "#f1f5f9",
-                        marginBottom: isMobile ? "8px" : "10px",
-                      }}
-                    >
-                      <img
-                        src={med.image}
-                        alt={med.name}
-                        decoding="async"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                        }}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                          display: "block",
-                        }}
-                      />
-
-                      {unitLabel && (
-                        <span
-                          style={{
-                            position: "absolute",
-                            top: isMobile ? "5px" : "7px",
-                            left: isMobile ? "5px" : "7px",
-                            background: "rgba(15, 23, 42, 0.86)",
-                            color: "#ffffff",
-                            fontSize: isMobile ? "9.5px" : "10.5px",
-                            fontWeight: "700",
-                            padding: isMobile ? "2px 6px" : "3px 7px",
-                            borderRadius: "6px",
-                            backdropFilter: "blur(4px)",
-                            lineHeight: 1.2,
-                            maxWidth: "48%",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          U: {unitLabel}
-                        </span>
-                      )}
-
-                      {stripLabel && (
-                        <span
-                          style={{
-                            position: "absolute",
-                            top: isMobile ? "5px" : "7px",
-                            right: isMobile ? "5px" : "7px",
-                            background: "rgba(29, 78, 216, 0.92)",
-                            color: "#ffffff",
-                            fontSize: isMobile ? "9.5px" : "10.5px",
-                            fontWeight: "700",
-                            padding: isMobile ? "2px 6px" : "3px 7px",
-                            borderRadius: "6px",
-                            backdropFilter: "blur(4px)",
-                            lineHeight: 1.2,
-                            maxWidth: "48%",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          S: {stripLabel}
-                        </span>
-                      )}
-
-                      {boxLabel && (
-                        <span
-                          style={{
-                            position: "absolute",
-                            bottom: isMobile ? "5px" : "7px",
-                            right: isMobile ? "5px" : "7px",
-                            background: "rgba(5, 150, 105, 0.94)",
-                            color: "#ffffff",
-                            fontSize: isMobile ? "9.5px" : "10.5px",
-                            fontWeight: "700",
-                            padding: isMobile ? "2px 6px" : "3px 7px",
-                            borderRadius: "6px",
-                            backdropFilter: "blur(4px)",
-                            lineHeight: 1.2,
-                            maxWidth: "70%",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          Box: {boxLabel}
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  <h3
-                    style={{
-                      margin: "0 0 4px 0",
-                      fontSize: isMobile ? "12.5px" : isTablet ? "14px" : "16px",
-                      fontWeight: "700",
-                      color: "#0f172a",
-                      lineHeight: "1.3",
-                      wordBreak: "break-word",
-                      overflowWrap: "anywhere",
-                    }}
-                  >
-                    {med.name}
-                  </h3>
-
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: isMobile ? "10.5px" : isTablet ? "12px" : "13px",
-                      lineHeight: "1.35",
-                      color: "#475569",
-                      wordBreak: "break-word",
-                      overflowWrap: "anywhere",
-                    }}
-                  >
-                    🏢 {med.company}
-                  </p>
-                </div>
-
-                <div
+              return (
+                <Link
+                  key={uniqueId}
+                  href={`/medicine/${uniqueId}`}
+                  prefetch={true}
+                  onMouseEnter={() => primeMedicineInCache(med)}
+                  onTouchStart={() => primeMedicineInCache(med)}
+                  onClick={() => primeMedicineInCache(med)}
+                  className="card"
                   style={{
+                    padding: isMobile ? "10px" : isTablet ? "13px" : "16px",
+                    borderRadius: isMobile ? "13px" : "18px",
+                    boxSizing: "border-box",
+                    minWidth: 0,
                     display: "flex",
                     flexDirection: "column",
-                    alignItems: "stretch",
-                    gap: isMobile ? "6px" : "8px",
-                    marginTop: isMobile ? "10px" : "14px",
-                    minWidth: 0,
+                    justifyContent: "space-between",
                   }}
                 >
-                  <span
-                    className="details-btn"
-                    style={{
-                      margin: 0,
-                      fontSize: isMobile ? "10.5px" : isTablet ? "11.5px" : "13px",
-                      lineHeight: 1.25,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "3px",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    ডিটেইলস দেখুন <span>→</span>
-                  </span>
+                  <div style={{ minWidth: 0 }}>
+                    {med.image && (
+                      <div
+                        style={{
+                          position: "relative",
+                          width: "100%",
+                          height: isMobile ? "104px" : isTablet ? "128px" : "150px",
+                          overflow: "hidden",
+                          borderRadius: isMobile ? "9px" : "12px",
+                          background: "#f1f5f9",
+                          marginBottom: isMobile ? "8px" : "10px",
+                        }}
+                      >
+                        <img
+                          src={med.image}
+                          alt={med.name}
+                          decoding="async"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            display: "block",
+                          }}
+                        />
 
-                  <button
-                    type="button"
-                    onClick={(e) => handleAddToNotification(e, med)}
+                        {unitLabel && (
+                          <span
+                            style={{
+                              position: "absolute",
+                              top: isMobile ? "5px" : "7px",
+                              left: isMobile ? "5px" : "7px",
+                              background: "rgba(15, 23, 42, 0.86)",
+                              color: "#ffffff",
+                              fontSize: isMobile ? "9.5px" : "10.5px",
+                              fontWeight: "700",
+                              padding: isMobile ? "2px 6px" : "3px 7px",
+                              borderRadius: "6px",
+                              backdropFilter: "blur(4px)",
+                              lineHeight: 1.2,
+                              maxWidth: "48%",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            U: {unitLabel}
+                          </span>
+                        )}
+
+                        {stripLabel && (
+                          <span
+                            style={{
+                              position: "absolute",
+                              top: isMobile ? "5px" : "7px",
+                              right: isMobile ? "5px" : "7px",
+                              background: "rgba(29, 78, 216, 0.92)",
+                              color: "#ffffff",
+                              fontSize: isMobile ? "9.5px" : "10.5px",
+                              fontWeight: "700",
+                              padding: isMobile ? "2px 6px" : "3px 7px",
+                              borderRadius: "6px",
+                              backdropFilter: "blur(4px)",
+                              lineHeight: 1.2,
+                              maxWidth: "48%",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            S: {stripLabel}
+                          </span>
+                        )}
+
+                        {boxLabel && (
+                          <span
+                            style={{
+                              position: "absolute",
+                              bottom: isMobile ? "5px" : "7px",
+                              right: isMobile ? "5px" : "7px",
+                              background: "rgba(5, 150, 105, 0.94)",
+                              color: "#ffffff",
+                              fontSize: isMobile ? "9.5px" : "10.5px",
+                              fontWeight: "700",
+                              padding: isMobile ? "2px 6px" : "3px 7px",
+                              borderRadius: "6px",
+                              backdropFilter: "blur(4px)",
+                              lineHeight: 1.2,
+                              maxWidth: "70%",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            Box: {boxLabel}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    <h3
+                      style={{
+                        margin: "0 0 4px 0",
+                        fontSize: isMobile ? "12.5px" : isTablet ? "14px" : "16px",
+                        fontWeight: "700",
+                        color: "#0f172a",
+                        lineHeight: "1.3",
+                        wordBreak: "break-word",
+                        overflowWrap: "anywhere",
+                      }}
+                    >
+                      {med.name}
+                    </h3>
+
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: isMobile ? "10.5px" : isTablet ? "12px" : "13px",
+                        lineHeight: "1.35",
+                        color: "#475569",
+                        wordBreak: "break-word",
+                        overflowWrap: "anywhere",
+                      }}
+                    >
+                      🏢 {med.company}
+                    </p>
+                  </div>
+
+                  <div
                     style={{
-                      background:
-                        "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
-                      color: "#1d4ed8",
-                      border: "1px solid #93c5fd",
-                      padding: isMobile ? "6px 6px" : isTablet ? "7px 8px" : "8px 10px",
-                      borderRadius: isMobile ? "9px" : "11px",
-                      fontSize: isMobile ? "10px" : isTablet ? "11px" : "12px",
-                      fontWeight: "700",
-                      cursor: "pointer",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: isMobile ? "4px" : "5px",
-                      boxShadow:
-                        "0 4px 12px -3px rgba(37, 99, 235, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
-                      transition: "all 0.18s ease",
-                      width: "100%",
-                      boxSizing: "border-box",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "stretch",
+                      gap: isMobile ? "6px" : "8px",
+                      marginTop: isMobile ? "10px" : "14px",
+                      minWidth: 0,
                     }}
                   >
                     <span
+                      className="details-btn"
                       style={{
-                        width: isMobile ? "14px" : "16px",
-                        height: isMobile ? "14px" : "16px",
-                        borderRadius: "4px",
-                        background:
-                          "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
-                        color: "#ffffff",
+                        margin: 0,
+                        fontSize: isMobile ? "10.5px" : isTablet ? "11.5px" : "13px",
+                        lineHeight: 1.25,
                         display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        fontSize: isMobile ? "10px" : "12px",
-                        fontWeight: "800",
-                        lineHeight: 1,
-                        flexShrink: 0,
+                        gap: "3px",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
                       }}
                     >
-                      +
+                      ডিটেইলস দেখুন <span>→</span>
                     </span>
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
-                      নাই? সিলেক্ট করুন
-                    </span>
-                  </button>
-                </div>
-              </Link>
-            );
-          })
-        ) : (
-          <div
-            style={{
-              textAlign: "center",
-              gridColumn: "1 / -1",
-              padding: isMobile ? "34px 18px" : "50px",
-              background: "white",
-              borderRadius: isMobile ? "16px" : "20px",
-              border: "1px solid #e2e8f0",
-              boxSizing: "border-box",
-            }}
-          >
-            <p
+
+                    <button
+                      type="button"
+                      onClick={(e) => handleAddToNotification(e, med)}
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
+                        color: "#1d4ed8",
+                        border: "1px solid #93c5fd",
+                        padding: isMobile ? "6px 6px" : isTablet ? "7px 8px" : "8px 10px",
+                        borderRadius: isMobile ? "9px" : "11px",
+                        fontSize: isMobile ? "10px" : isTablet ? "11px" : "12px",
+                        fontWeight: "700",
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: isMobile ? "4px" : "5px",
+                        boxShadow:
+                          "0 4px 12px -3px rgba(37, 99, 235, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
+                        transition: "all 0.18s ease",
+                        width: "100%",
+                        boxSizing: "border-box",
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: isMobile ? "14px" : "16px",
+                          height: isMobile ? "14px" : "16px",
+                          borderRadius: "4px",
+                          background:
+                            "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+                          color: "#ffffff",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: isMobile ? "10px" : "12px",
+                          fontWeight: "800",
+                          lineHeight: 1,
+                          flexShrink: 0,
+                        }}
+                      >
+                        +
+                      </span>
+                      <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+                        নাই? সিলেক্ট করুন
+                      </span>
+                    </button>
+                  </div>
+                </Link>
+              );
+            })
+          ) : (
+            <div
               style={{
-                color: "#64748b",
-                fontSize: isMobile ? "14px" : "16px",
-                margin: 0,
-                lineHeight: "1.5",
+                textAlign: "center",
+                gridColumn: "1 / -1",
+                padding: isMobile ? "34px 18px" : "50px",
+                background: "white",
+                borderRadius: isMobile ? "16px" : "20px",
+                border: "1px solid #e2e8f0",
+                boxSizing: "border-box",
               }}
             >
-              দুঃখিত, কোনো ঔষধ বা কোম্পানি খুঁজে পাওয়া যায়নি।
-            </p>
-          </div>
-        )}
-      </div>
+              <p
+                style={{
+                  color: "#64748b",
+                  fontSize: isMobile ? "14px" : "16px",
+                  margin: 0,
+                  lineHeight: "1.5",
+                }}
+              >
+                দুঃখিত, কোনো ঔষধ বা কোম্পানি খুঁজে পাওয়া যায়নি।
+              </p>
+            </div>
+          )}
+        </div>
+      )}
     </main>
   );
 }
