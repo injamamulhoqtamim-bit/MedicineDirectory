@@ -304,7 +304,7 @@ export default function Navbar() {
             textShadow: "0 2px 8px rgba(0, 0, 0, 0.25)",
           }}
         >
-          Sheikh Drugs Pharma
+          Sheikh Drugs House
         </span>
         {!isMobile && (
           <span
@@ -620,7 +620,7 @@ export default function Navbar() {
                 }}
               >
                 &ldquo;{searchQuery.trim()}&rdquo; এর সাথে মিলে এমন কোনো ঔষধ
-                পাওয়া যায়নি।
+                পাওয়া যায়নি।
               </div>
             )}
           </div>

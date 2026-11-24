@@ -37,8 +37,12 @@ export default function LeftSidebar({
 }) {
   const sidebarWidth = isTablet ? 265 : 315;
 
-  const [customCompanies, setCustomCompanies] = useState([]);
-  const [deletedCompanies, setDeletedCompanies] = useState([]);
+  const [customCompanies, setCustomCompanies] = useState(() =>
+    readStringArray(CUSTOM_COMPANIES_STORAGE_KEY)
+  );
+  const [deletedCompanies, setDeletedCompanies] = useState(() =>
+    readStringArray(DELETED_COMPANIES_STORAGE_KEY)
+  );
   const [showAddCompanyInput, setShowAddCompanyInput] = useState(false);
   const [newCompanyName, setNewCompanyName] = useState("");
   const [companyError, setCompanyError] = useState("");
@@ -253,7 +257,7 @@ export default function LeftSidebar({
       setMobileSidebarOpen(false);
     }
     if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "auto" });
     }
   };
 
@@ -304,7 +308,7 @@ export default function LeftSidebar({
                 textOverflow: "ellipsis",
               }}
             >
-              Sheikh Drugs Pharma
+              Sheikh Drugs House
             </h2>
             <span
               style={{
@@ -343,7 +347,6 @@ export default function LeftSidebar({
               fontSize: isTablet ? "12px" : "13px",
               fontWeight: "700",
               boxShadow: "0 6px 14px -4px rgba(220, 38, 38, 0.25)",
-              transition: "all 0.18s ease",
               whiteSpace: "nowrap",
             }}
           >
@@ -464,7 +467,6 @@ export default function LeftSidebar({
             alignItems: "center",
             justifyContent: "center",
             cursor: "pointer",
-            transition: "all 0.15s ease",
             flexShrink: 0,
           }}
         >
@@ -554,130 +556,109 @@ export default function LeftSidebar({
           paddingRight: "2px",
         }}
       >
-        {combinedCompanies.length === 0 ? (
-          <div
-            style={{
-              padding: "16px 12px",
-              borderRadius: "12px",
-              background: "#f8fafc",
-              border: "1px dashed #cbd5e1",
-              textAlign: "center",
-              fontSize: "12px",
-              color: "#64748b",
-              lineHeight: "1.5",
-            }}
-          >
-            কোনো কোম্পানি যোগ করা হয়নি। উপরে{" "}
-            <strong style={{ color: "#1d4ed8" }}>+</strong> বাটনে ক্লিক করে
-            কোম্পানি যুক্ত করুন।
-          </div>
-        ) : (
-          combinedCompanies.map((comp, index) => {
-            const isActive = selectedCompany === comp;
-            const countForComp = Array.isArray(medicines)
-              ? medicines.filter((m) => m.company === comp).length
-              : 0;
+        {combinedCompanies.map((comp, index) => {
+          const isActive = selectedCompany === comp;
+          const countForComp = Array.isArray(medicines)
+            ? medicines.filter((m) => m.company === comp).length
+            : 0;
 
-            return (
-              <div
-                key={`${comp}-${index}`}
+          return (
+            <div
+              key={`${comp}-${index}`}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "4px",
+                padding: "4px 6px 4px 4px",
+                borderRadius: "10px",
+                border: isActive
+                  ? "1px solid #bfdbfe"
+                  : "1px solid transparent",
+                background: isActive
+                  ? "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)"
+                  : "transparent",
+                flexShrink: 0,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => handleSelectCompany(comp)}
                 style={{
+                  flex: 1,
+                  minWidth: 0,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  gap: "4px",
-                  padding: "4px 6px 4px 4px",
-                  borderRadius: "10px",
-                  border: isActive
-                    ? "1px solid #bfdbfe"
-                    : "1px solid transparent",
-                  background: isActive
-                    ? "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)"
-                    : "transparent",
-                  transition: "all 0.15s ease",
-                  flexShrink: 0,
+                  gap: "8px",
+                  textAlign: "left",
+                  padding: "5px 6px",
+                  borderRadius: "8px",
+                  border: "none",
+                  background: "transparent",
+                  color: isActive ? "#1d4ed8" : "#334155",
+                  fontWeight: isActive ? "700" : "500",
+                  cursor: "pointer",
+                  fontSize: "12.5px",
+                  lineHeight: "1.35",
                 }}
               >
-                <button
-                  type="button"
-                  onClick={() => handleSelectCompany(comp)}
-                  style={{
-                    flex: 1,
-                    minWidth: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: "8px",
-                    textAlign: "left",
-                    padding: "5px 6px",
-                    borderRadius: "8px",
-                    border: "none",
-                    background: "transparent",
-                    color: isActive ? "#1d4ed8" : "#334155",
-                    fontWeight: isActive ? "700" : "500",
-                    cursor: "pointer",
-                    fontSize: "12.5px",
-                    lineHeight: "1.35",
-                  }}
-                >
-                  <span style={{ minWidth: 0, wordBreak: "break-word" }}>
-                    🏢 {comp}
+                <span style={{ minWidth: 0, wordBreak: "break-word" }}>
+                  🏢 {comp}
+                </span>
+                {countForComp > 0 && (
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: "700",
+                      padding: "2px 7px",
+                      borderRadius: "999px",
+                      background: isActive ? "#2563eb" : "#e2e8f0",
+                      color: isActive ? "#ffffff" : "#475569",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {countForComp}
                   </span>
-                  {countForComp > 0 && (
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        fontWeight: "700",
-                        padding: "2px 7px",
-                        borderRadius: "999px",
-                        background: isActive ? "#2563eb" : "#e2e8f0",
-                        color: isActive ? "#ffffff" : "#475569",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {countForComp}
-                    </span>
-                  )}
-                </button>
+                )}
+              </button>
 
-                <button
-                  type="button"
-                  onClick={(e) => handleRequestDeleteCompany(e, comp)}
-                  title={`Delete ${comp}`}
-                  aria-label={`Delete ${comp}`}
-                  style={{
-                    width: "24px",
-                    height: "24px",
-                    borderRadius: "7px",
-                    border: "1px solid transparent",
-                    background: "transparent",
-                    color: "#94a3b8",
-                    fontSize: "12px",
-                    fontWeight: "700",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    flexShrink: 0,
-                    transition: "all 0.15s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "#fee2e2";
-                    e.currentTarget.style.color = "#dc2626";
-                    e.currentTarget.style.borderColor = "#fca5a5";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "transparent";
-                    e.currentTarget.style.color = "#94a3b8";
-                    e.currentTarget.style.borderColor = "transparent";
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-            );
-          })
-        )}
+              <button
+                type="button"
+                onClick={(e) => handleRequestDeleteCompany(e, comp)}
+                title={`Delete ${comp}`}
+                aria-label={`Delete ${comp}`}
+                style={{
+                  width: "24px",
+                  height: "24px",
+                  borderRadius: "7px",
+                  border: "1px solid transparent",
+                  background: "transparent",
+                  color: "#94a3b8",
+                  fontSize: "12px",
+                  fontWeight: "700",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  flexShrink: 0,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#fee2e2";
+                  e.currentTarget.style.color = "#dc2626";
+                  e.currentTarget.style.borderColor = "#fca5a5";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.color = "#94a3b8";
+                  e.currentTarget.style.borderColor = "transparent";
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          );
+        })}
       </div>
     </>
   );
@@ -818,7 +799,6 @@ export default function LeftSidebar({
             zIndex: 40,
             width: "100%",
             background: "rgba(255, 255, 255, 0.96)",
-            backdropFilter: "blur(10px)",
             borderBottom: "1px solid #e2e8f0",
             padding: "10px 12px",
             display: "flex",
@@ -875,7 +855,7 @@ export default function LeftSidebar({
                 whiteSpace: "nowrap",
               }}
             >
-              Sheikh Drugs Pharma
+              Sheikh Drugs House
             </div>
           </button>
 
@@ -901,7 +881,7 @@ export default function LeftSidebar({
         </div>
       )}
 
-      {/* Mobile Drawer Sidebar */}
+      {/* Mobile Drawer Sidebar (Instant Open) */}
       {isMobile && mobileSidebarOpen && (
         <div
           onClick={() => setMobileSidebarOpen(false)}
@@ -910,7 +890,6 @@ export default function LeftSidebar({
             inset: 0,
             zIndex: 1500,
             background: "rgba(15, 23, 42, 0.45)",
-            backdropFilter: "blur(3px)",
             display: "flex",
           }}
         >

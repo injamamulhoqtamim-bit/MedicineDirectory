@@ -102,7 +102,7 @@ export default function RightContent({
                 wordBreak: "break-word",
               }}
             >
-              Sheikh Drugs Pharma
+              Sheikh Drugs House
             </div>
             <div
               style={{

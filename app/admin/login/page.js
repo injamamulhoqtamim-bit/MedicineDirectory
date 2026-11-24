@@ -134,7 +134,7 @@ export default function AdminLogin() {
               borderRadius: "999px",
             }}
           >
-            Sheikh Drugs Pharma
+            Sheikh Drugs House
           </span>
         </div>
 
