@@ -39,17 +39,17 @@ export default function Footer() {
         margin: isMobile ? "22px auto 14px auto" : "34px auto 20px auto",
         padding: isMobile ? "18px 14px" : isTablet ? "22px 20px" : "28px 24px",
         background:
-          "linear-gradient(135deg, #090e1a 0%, #0f172a 48%, #1e3a8a 100%)",
+          "linear-gradient(135deg, #060a14 0%, #0f172a 46%, #172554 78%, #1e3a8a 100%)",
         color: "#ffffff",
-        borderRadius: isMobile ? "16px" : "22px",
-        border: "1px solid rgba(147, 197, 253, 0.28)",
+        borderRadius: isMobile ? "18px" : "24px",
+        border: "1px solid rgba(147, 197, 253, 0.34)",
         boxShadow:
-          "0 20px 38px -12px rgba(15, 23, 42, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.08)",
+          "0 22px 42px -14px rgba(15, 23, 42, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12)",
         boxSizing: "border-box",
         overflowX: "clip",
       }}
     >
-      {/* Top Section: Brand + Quick Navigation + Direct Call */}
+      {/* Top Section: Highlighted Brand + Quick Navigation + Direct Call */}
       <div
         style={{
           display: "flex",
@@ -58,48 +58,70 @@ export default function Footer() {
           justifyContent: "space-between",
           alignItems: isMobile ? "stretch" : "center",
           gap: isMobile ? "14px" : "18px",
-          paddingBottom: isMobile ? "14px" : "20px",
+          paddingBottom: isMobile ? "16px" : "22px",
           borderBottom: "1px solid rgba(148, 163, 184, 0.22)",
         }}
       >
-        <div style={{ minWidth: 0, flex: "1 1 260px" }}>
+        <div style={{ minWidth: 0, flex: "1 1 280px" }}>
+          {/* Top: Sheikh Drugs House */}
           <div
             style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "4px 10px",
-              borderRadius: "999px",
-              background: "rgba(56, 189, 248, 0.14)",
-              border: "1px solid rgba(125, 211, 252, 0.28)",
-              fontSize: isMobile ? "10px" : "11px",
-              fontWeight: "700",
-              letterSpacing: "0.04em",
-              color: "#7dd3fc",
-              marginBottom: "8px",
+              display: "inline-block",
+              padding: isMobile ? "6px 12px" : "8px 16px",
+              borderRadius: isMobile ? "12px" : "14px",
+              background:
+                "linear-gradient(135deg, rgba(59, 130, 246, 0.22) 0%, rgba(14, 165, 233, 0.14) 100%)",
+              border: "1px solid rgba(125, 211, 252, 0.45)",
+              boxShadow: "0 8px 24px -8px rgba(56, 189, 248, 0.35)",
+              maxWidth: "100%",
+              boxSizing: "border-box",
             }}
           >
-            <span>PHARMACY DIRECTORY</span>
+            <h2
+              style={{
+                margin: 0,
+                fontSize: isMobile ? "20px" : isTablet ? "24px" : "28px",
+                fontWeight: "900",
+                letterSpacing: "-0.02em",
+                lineHeight: 1.2,
+                background:
+                  "linear-gradient(90deg, #ffffff 0%, #e0f2fe 55%, #7dd3fc 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                textShadow: "0 2px 14px rgba(125, 211, 252, 0.25)",
+                wordBreak: "break-word",
+              }}
+            >
+              Sheikh Drugs House
+            </h2>
           </div>
 
-          <h2
-            style={{
-              margin: 0,
-              fontSize: isMobile ? "18px" : isTablet ? "20px" : "22px",
-              fontWeight: "800",
-              letterSpacing: "-0.015em",
-              color: "#ffffff",
-              lineHeight: 1.25,
-              wordBreak: "break-word",
-            }}
-          >
-            Sheikh Drugs House
-          </h2>
+          {/* Below Brand: PHARMACY DIRECTORY */}
+          <div style={{ marginTop: "8px" }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "4px 11px",
+                borderRadius: "999px",
+                background: "rgba(56, 189, 248, 0.16)",
+                border: "1px solid rgba(125, 211, 252, 0.34)",
+                fontSize: isMobile ? "10px" : "11px",
+                fontWeight: "800",
+                letterSpacing: "0.05em",
+                color: "#7dd3fc",
+              }}
+            >
+              <span>PHARMACY DIRECTORY</span>
+            </div>
+          </div>
+
           <p
             style={{
-              margin: "5px 0 0 0",
+              margin: "8px 0 0 0",
               fontSize: isMobile ? "12px" : "13px",
-              lineHeight: 1.5,
+              lineHeight: 1.55,
               color: "#cbd5e1",
               wordBreak: "break-word",
             }}
@@ -123,12 +145,12 @@ export default function Footer() {
             style={{
               color: "#f8fafc",
               textDecoration: "none",
-              padding: isMobile ? "9px 14px" : "9px 15px",
+              padding: isMobile ? "9px 14px" : "9px 16px",
               borderRadius: "12px",
               fontSize: isMobile ? "12.5px" : "13px",
               fontWeight: "700",
               background: "rgba(255, 255, 255, 0.1)",
-              border: "1px solid rgba(255, 255, 255, 0.18)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
               textAlign: "center",
             }}
           >
@@ -149,8 +171,8 @@ export default function Footer() {
               fontSize: isMobile ? "13px" : "13.5px",
               fontWeight: "800",
               background: "linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)",
-              border: "1px solid rgba(255, 255, 255, 0.65)",
-              boxShadow: "0 8px 18px -6px rgba(125, 211, 252, 0.55)",
+              border: "1px solid rgba(255, 255, 255, 0.72)",
+              boxShadow: "0 8px 20px -6px rgba(125, 211, 252, 0.6)",
             }}
           >
             <span>📞</span>
@@ -175,8 +197,8 @@ export default function Footer() {
       >
         <div
           style={{
-            background: "rgba(255, 255, 255, 0.06)",
-            border: "1px solid rgba(255, 255, 255, 0.12)",
+            background: "rgba(255, 255, 255, 0.065)",
+            border: "1px solid rgba(255, 255, 255, 0.13)",
             borderRadius: isMobile ? "12px" : "15px",
             padding: isMobile ? "12px 13px" : "14px 16px",
             minWidth: 0,
@@ -207,8 +229,8 @@ export default function Footer() {
 
         <div
           style={{
-            background: "rgba(255, 255, 255, 0.06)",
-            border: "1px solid rgba(255, 255, 255, 0.12)",
+            background: "rgba(255, 255, 255, 0.065)",
+            border: "1px solid rgba(255, 255, 255, 0.13)",
             borderRadius: isMobile ? "12px" : "15px",
             padding: isMobile ? "12px 13px" : "14px 16px",
             minWidth: 0,
@@ -240,8 +262,8 @@ export default function Footer() {
 
         <div
           style={{
-            background: "rgba(255, 255, 255, 0.06)",
-            border: "1px solid rgba(255, 255, 255, 0.12)",
+            background: "rgba(255, 255, 255, 0.065)",
+            border: "1px solid rgba(255, 255, 255, 0.13)",
             borderRadius: isMobile ? "12px" : "15px",
             padding: isMobile ? "12px 13px" : "14px 16px",
             minWidth: 0,
@@ -298,7 +320,11 @@ export default function Footer() {
         }}
       >
         <span>
-          © {new Date().getFullYear()} Sheikh Drugs House. সর্বস্বত্ব সংরক্ষিত।
+          © {new Date().getFullYear()}{" "}
+          <strong style={{ color: "#ffffff", fontWeight: "800" }}>
+            Sheikh Drugs House
+          </strong>
+          . সর্বস্বত্ব সংরক্ষিত।
         </span>
         <span
           style={{
