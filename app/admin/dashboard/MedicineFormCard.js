@@ -482,51 +482,19 @@ export default function MedicineFormCard({
           />
         </div>
 
-        {/* Dynamic Alternative Brands + Company Name with + Button */}
+        {/* Dynamic Alternative Brands + Company Name */}
         <div>
-          <div
+          <label
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "8px",
+              display: "block",
+              fontSize: "14px",
+              fontWeight: "700",
+              color: "#334155",
               marginBottom: "8px",
             }}
           >
-            <label
-              style={{
-                fontSize: "14px",
-                fontWeight: "700",
-                color: "#334155",
-                margin: 0,
-              }}
-            >
-              Alternative Brands:
-            </label>
-
-            <button
-              type="button"
-              onClick={handleAddAlternativeRow}
-              title="Add another alternative brand"
-              aria-label="Add another alternative brand"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "5px",
-                padding: "6px 12px",
-                borderRadius: "10px",
-                border: "1px solid #bfdbfe",
-                background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
-                color: "#1d4ed8",
-                fontSize: "12.5px",
-                fontWeight: "700",
-                cursor: "pointer",
-              }}
-            >
-              <span style={{ fontSize: "15px", lineHeight: 1 }}>+</span>
-              <span>Add Alternative</span>
-            </button>
-          </div>
+            Alternative Brands:
+          </label>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             {safeAlternatives.map((alt, idx) => (
@@ -608,6 +576,32 @@ export default function MedicineFormCard({
               </div>
             ))}
           </div>
+
+          <button
+            type="button"
+            onClick={handleAddAlternativeRow}
+            title="Add another alternative brand"
+            aria-label="Add another alternative brand"
+            style={{
+              marginTop: "12px",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "9px 14px",
+              borderRadius: "10px",
+              border: "1px solid #bfdbfe",
+              background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
+              color: "#1d4ed8",
+              fontSize: "13px",
+              fontWeight: "700",
+              cursor: "pointer",
+              alignSelf: isMobile ? "stretch" : "flex-start",
+              justifyContent: "center",
+            }}
+          >
+            <span style={{ fontSize: "15px", lineHeight: 1 }}>+</span>
+            <span>Add Alternative</span>
+          </button>
         </div>
 
         <button

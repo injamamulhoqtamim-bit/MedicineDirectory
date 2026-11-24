@@ -4,6 +4,28 @@ import Link from "next/link";
 import { initialMedicines } from "../../data/medicines";
 import AlternativeBrandsBox from "../../components/AlternativeBrandsBox";
 
+function primeSingleMedicineInCache(med) {
+  if (!med || typeof med !== "object") return;
+  const targetId = String(med?._id || med?.id || "").trim();
+  if (!targetId) return;
+
+  try {
+    const existingRaw = JSON.parse(
+      sessionStorage.getItem("allMedicinesCache") || "[]"
+    );
+    const list = Array.isArray(existingRaw) ? existingRaw : [];
+    const filtered = list.filter(
+      (item) => String(item?._id || item?.id || "").trim() !== targetId
+    );
+    sessionStorage.setItem(
+      "allMedicinesCache",
+      JSON.stringify([med, ...filtered])
+    );
+  } catch {
+    // ignore storage errors
+  }
+}
+
 function findLocalMedicine(id) {
   if (!id) return null;
 
@@ -73,6 +95,7 @@ export default function MedicineDetail({ params }) {
 
     if (instantMatch) {
       setMedicine(instantMatch);
+      primeSingleMedicineInCache(instantMatch);
       setSyncing(false);
     } else {
       setSyncing(true);

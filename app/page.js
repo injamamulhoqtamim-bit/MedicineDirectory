@@ -12,6 +12,7 @@ import {
 
 // ফাইলটি public ফোল্ডারের ভেতরে থাকলে নিচের পাথ কাজ করবে (যেমন: "/pharmacist-banner.png" বা "/Smiling Pharmacist Using Smartphone.png")
 const HERO_BACKGROUND_IMAGE = "/Smiling Pharmacist Using Smartphone.png";
+const ITEMS_PER_PAGE = 8;
 
 function getSafeBackgroundUrl(rawPath) {
   if (!rawPath || typeof rawPath !== "string") return "";
@@ -84,6 +85,8 @@ export default function Home() {
   const [selectedCompany, setSelectedCompany] = useState("");
   const [companyMedQuery, setCompanyMedQuery] = useState("");
   const [activeCompanyMedSearch, setActiveCompanyMedSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [extraVisibleCount, setExtraVisibleCount] = useState(0);
   const [medicinesData, setMedicinesData] = useState(initialMedicines);
   const [customCompanies, setCustomCompanies] = useState([]);
   const [deletedCompanies, setDeletedCompanies] = useState([]);
@@ -161,18 +164,24 @@ export default function Home() {
     return () => window.removeEventListener("resize", updateViewport);
   }, []);
 
+  const resetPagination = useCallback(() => {
+    setCurrentPage(1);
+    setExtraVisibleCount(0);
+  }, []);
+
   const resetAllFilters = useCallback(() => {
     setSearchTerm("");
     setNavbarSearch("");
     setSelectedCompany("");
     setCompanyMedQuery("");
     setActiveCompanyMedSearch("");
+    resetPagination();
     sessionStorage.setItem("medicineSearchTerm", "");
     window.dispatchEvent(new CustomEvent("navbarSearchSync", { detail: "" }));
     if (typeof window !== "undefined" && window.location.search) {
       window.history.replaceState(null, "", "/");
     }
-  }, []);
+  }, [resetPagination]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -186,6 +195,7 @@ export default function Home() {
       setSelectedCompany("");
       setCompanyMedQuery("");
       setActiveCompanyMedSearch("");
+      resetPagination();
       sessionStorage.setItem("medicineSearchTerm", initialSearch);
       window.dispatchEvent(
         new CustomEvent("navbarSearchSync", { detail: initialSearch })
@@ -196,6 +206,7 @@ export default function Home() {
       const val = String(e?.detail || "");
       setSearchTerm(val);
       setNavbarSearch(val);
+      resetPagination();
       if (val.trim()) {
         setSelectedCompany("");
         setCompanyMedQuery("");
@@ -210,11 +221,12 @@ export default function Home() {
       window.removeEventListener("navbarSearch", handleNavbarSearch);
       window.removeEventListener("resetAllFilters", resetAllFilters);
     };
-  }, [resetAllFilters]);
+  }, [resetAllFilters, resetPagination]);
 
   const syncSearchToNavbar = (val) => {
     setSearchTerm(val);
     setNavbarSearch(val);
+    resetPagination();
     sessionStorage.setItem("medicineSearchTerm", val);
     window.dispatchEvent(
       new CustomEvent("navbarSearchSync", { detail: val })
@@ -224,11 +236,13 @@ export default function Home() {
   const resetCompanyMedSearch = () => {
     setCompanyMedQuery("");
     setActiveCompanyMedSearch("");
+    resetPagination();
   };
 
   const handleCompanyMedSearchSubmit = (e) => {
     e.preventDefault();
     setActiveCompanyMedSearch(companyMedQuery.trim());
+    resetPagination();
   };
 
   const cacheMedicinesForDetail = useCallback((list) => {
@@ -380,6 +394,41 @@ export default function Home() {
       return true;
     });
   }, [visibleMedicines, searchLower, selectedCompany, companyQueryLower]);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredMedicines.length / ITEMS_PER_PAGE)
+  );
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const pageStartIndex = (safeCurrentPage - 1) * ITEMS_PER_PAGE;
+  const currentSliceEndIndex = Math.min(
+    filteredMedicines.length,
+    pageStartIndex + ITEMS_PER_PAGE + extraVisibleCount
+  );
+
+  const displayedMedicines = useMemo(
+    () => filteredMedicines.slice(pageStartIndex, currentSliceEndIndex),
+    [filteredMedicines, pageStartIndex, currentSliceEndIndex]
+  );
+
+  const hasMoreInCurrentView = currentSliceEndIndex < filteredMedicines.length;
+  const pageNumbers = useMemo(
+    () => Array.from({ length: totalPages }, (_, idx) => idx + 1),
+    [totalPages]
+  );
+
+  const handleSeeMore = () => {
+    setExtraVisibleCount((prev) => prev + ITEMS_PER_PAGE);
+  };
+
+  const handlePageChange = (pageNum) => {
+    setCurrentPage(pageNum);
+    setExtraVisibleCount(0);
+    const el = document.getElementById("medicine-results-section");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   const handleAddToNotification = (e, med) => {
     e.preventDefault();
@@ -706,6 +755,7 @@ export default function Home() {
                 const val = e.target.value;
                 setCompanyMedQuery(val);
                 setActiveCompanyMedSearch(val.trim());
+                resetPagination();
               }}
               placeholder={`${selectedCompany}-এর ওষুধের নাম লিখুন...`}
               aria-label={`Search medicines in ${selectedCompany}`}
@@ -785,8 +835,8 @@ export default function Home() {
             boxSizing: "border-box",
           }}
         >
-          {filteredMedicines.length > 0 ? (
-            filteredMedicines.map((med) => {
+          {displayedMedicines.length > 0 ? (
+            displayedMedicines.map((med) => {
               const uniqueId = med._id || med.id;
               const unitLabel = formatPriceLabel(med.unitPrice);
               const stripLabel = formatPriceLabel(med.stripPrice);
@@ -817,7 +867,11 @@ export default function Home() {
                         style={{
                           position: "relative",
                           width: "100%",
-                          height: isMobile ? "104px" : isTablet ? "128px" : "150px",
+                          height: isMobile
+                            ? "104px"
+                            : isTablet
+                            ? "128px"
+                            : "150px",
                           overflow: "hidden",
                           borderRadius: isMobile ? "9px" : "12px",
                           background: "#f1f5f9",
@@ -916,7 +970,11 @@ export default function Home() {
                     <h3
                       style={{
                         margin: "0 0 4px 0",
-                        fontSize: isMobile ? "12.5px" : isTablet ? "14px" : "16px",
+                        fontSize: isMobile
+                          ? "12.5px"
+                          : isTablet
+                          ? "14px"
+                          : "16px",
                         fontWeight: "700",
                         color: "#0f172a",
                         lineHeight: "1.3",
@@ -930,7 +988,11 @@ export default function Home() {
                     <p
                       style={{
                         margin: 0,
-                        fontSize: isMobile ? "10.5px" : isTablet ? "12px" : "13px",
+                        fontSize: isMobile
+                          ? "10.5px"
+                          : isTablet
+                          ? "12px"
+                          : "13px",
                         lineHeight: "1.35",
                         color: "#475569",
                         wordBreak: "break-word",
@@ -955,7 +1017,11 @@ export default function Home() {
                       className="details-btn"
                       style={{
                         margin: 0,
-                        fontSize: isMobile ? "10.5px" : isTablet ? "11.5px" : "13px",
+                        fontSize: isMobile
+                          ? "10.5px"
+                          : isTablet
+                          ? "11.5px"
+                          : "13px",
                         lineHeight: 1.25,
                         display: "inline-flex",
                         alignItems: "center",
@@ -977,9 +1043,17 @@ export default function Home() {
                           "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
                         color: "#1d4ed8",
                         border: "1px solid #93c5fd",
-                        padding: isMobile ? "6px 6px" : isTablet ? "7px 8px" : "8px 10px",
+                        padding: isMobile
+                          ? "6px 6px"
+                          : isTablet
+                          ? "7px 8px"
+                          : "8px 10px",
                         borderRadius: isMobile ? "9px" : "11px",
-                        fontSize: isMobile ? "10px" : isTablet ? "11px" : "12px",
+                        fontSize: isMobile
+                          ? "10px"
+                          : isTablet
+                          ? "11px"
+                          : "12px",
                         fontWeight: "700",
                         cursor: "pointer",
                         whiteSpace: "nowrap",
@@ -1015,7 +1089,9 @@ export default function Home() {
                       >
                         +
                       </span>
-                      <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+                      <span
+                        style={{ overflow: "hidden", textOverflow: "ellipsis" }}
+                      >
                         নাই? সিলেক্ট করুন
                       </span>
                     </button>
@@ -1047,6 +1123,78 @@ export default function Home() {
               </p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* See More + Page Numbers (1, 2, 3, 4, 5...) */}
+      {filteredMedicines.length > ITEMS_PER_PAGE && (
+        <div
+          style={{
+            marginTop: isMobile ? "18px" : "26px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: isMobile ? "12px" : "16px",
+          }}
+        >
+          {hasMoreInCurrentView && (
+            <button
+              type="button"
+              onClick={handleSeeMore}
+              style={{
+                background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "12px",
+                padding: isMobile ? "10px 22px" : "11px 28px",
+                fontSize: isMobile ? "13px" : "14px",
+                fontWeight: "700",
+                cursor: "pointer",
+                boxShadow: "0 8px 18px -6px rgba(29, 78, 216, 0.45)",
+              }}
+            >
+              See More
+            </button>
+          )}
+
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: isMobile ? "6px" : "8px",
+            }}
+          >
+            {pageNumbers.map((pageNum) => {
+              const isCurrent = safeCurrentPage === pageNum;
+              return (
+                <button
+                  type="button"
+                  key={pageNum}
+                  onClick={() => handlePageChange(pageNum)}
+                  style={{
+                    minWidth: isMobile ? "34px" : "38px",
+                    height: isMobile ? "34px" : "38px",
+                    padding: "0 10px",
+                    borderRadius: "10px",
+                    border: isCurrent
+                      ? "1px solid #1d4ed8"
+                      : "1px solid #cbd5e1",
+                    background: isCurrent
+                      ? "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)"
+                      : "#ffffff",
+                    color: isCurrent ? "#ffffff" : "#0f172a",
+                    fontSize: isMobile ? "12.5px" : "13.5px",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                  }}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
     </main>
